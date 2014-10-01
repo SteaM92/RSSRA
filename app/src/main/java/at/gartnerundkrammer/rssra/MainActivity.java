@@ -1,12 +1,13 @@
 package at.gartnerundkrammer.rssra;
 
 import android.app.Activity;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 
 
-public class MainActivity extends Activity implements PostingsListFragment.OnPostingsListFragmentInteractionListener, RSSListFragment.OnRSSListFragmentInteractionListener{
+public class MainActivity extends Activity implements PostingsListFragment.OnPostingsListFragmentInteractionListener, RSSListFragment.OnRSSListFragmentInteractionListener, SubscribeToRSSFragment.OnSubscribeToRSSFragmentInteractionListener{
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -30,8 +31,16 @@ public class MainActivity extends Activity implements PostingsListFragment.OnPos
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
+        switch (id){
+            case R.id.action_settings:
+                return true;
+
+            case R.id.action_addRSS:
+                return true;
+
+            case R.id.action_about:
+                return true;
+
         }
 
         return super.onOptionsItemSelected(item);
@@ -44,6 +53,11 @@ public class MainActivity extends Activity implements PostingsListFragment.OnPos
 
     @Override
     public void onRSSListFragmentInteraction(String id) {
+
+    }
+
+    @Override
+    public void onSubscribeToRSSFragmentInteraction(Uri uri) {
 
     }
 }
