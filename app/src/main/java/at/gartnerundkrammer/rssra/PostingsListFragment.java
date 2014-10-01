@@ -35,7 +35,7 @@ public class PostingsListFragment extends Fragment implements AbsListView.OnItem
     private String mParam1;
     private String mParam2;
 
-    private OnFragmentInteractionListener mListener;
+    private OnPostingsListFragmentInteractionListener mListener;
 
     /**
      * The fragment's ListView/GridView.
@@ -63,6 +63,23 @@ public class PostingsListFragment extends Fragment implements AbsListView.OnItem
      * fragment (e.g. upon screen orientation changes).
      */
     public PostingsListFragment() {
+    }
+
+    @Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+        try {
+            mListener = (OnPostingsListFragmentInteractionListener) activity;
+        } catch (ClassCastException e) {
+            throw new ClassCastException(activity.toString()
+                    + " must implement OnPostingsListFragmentInteractionListener");
+        }
+    }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        mListener = null;
     }
 
     @Override
@@ -99,7 +116,7 @@ public class PostingsListFragment extends Fragment implements AbsListView.OnItem
         if (null != mListener) {
             // Notify the active callbacks interface (the activity, if the
             // fragment is attached to one) that an item has been selected.
-            mListener.onFragmentInteraction(DummyContent.ITEMS.get(position).id);
+            mListener.onPostingsListFragmentInteraction(DummyContent.ITEMS.get(position).id);
         }
     }
 
@@ -126,9 +143,9 @@ public class PostingsListFragment extends Fragment implements AbsListView.OnItem
     * "http://developer.android.com/training/basics/fragments/communicating.html"
     * >Communicating with Other Fragments</a> for more information.
     */
-    public interface OnFragmentInteractionListener {
+    public interface OnPostingsListFragmentInteractionListener {
         // TODO: Update argument type and name
-        public void onFragmentInteraction(String id);
+        public void onPostingsListFragmentInteraction(String id);
     }
 
 }
