@@ -1,6 +1,9 @@
 package at.gartnerundkrammer.rssra;
 
 import android.app.Activity;
+import android.app.Fragment;
+import android.app.FragmentManager;
+import android.app.FragmentTransaction;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.Menu;
@@ -13,6 +16,15 @@ public class MainActivity extends Activity implements PostingsListFragment.OnPos
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        changeFragment(new PostingsListFragment());
+    }
+
+    public void changeFragment(Fragment fragment) {
+        FragmentManager fm = getFragmentManager();
+        FragmentTransaction transaction = fm.beginTransaction();
+        transaction.replace(R.id.fragment_place, fragment);
+        transaction.addToBackStack(((Object) fragment).getClass().getName());
+        transaction.commit();
     }
 
 
@@ -36,6 +48,7 @@ public class MainActivity extends Activity implements PostingsListFragment.OnPos
                 return true;
 
             case R.id.action_addRSS:
+                changeFragment(new RSSListFragment());
                 return true;
 
             case R.id.action_about:

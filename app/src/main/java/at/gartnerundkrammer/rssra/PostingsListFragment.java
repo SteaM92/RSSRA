@@ -58,13 +58,6 @@ public class PostingsListFragment extends Fragment implements AbsListView.OnItem
         return fragment;
     }
 
-    /**
-     * Mandatory empty constructor for the fragment manager to instantiate the
-     * fragment (e.g. upon screen orientation changes).
-     */
-    public PostingsListFragment() {
-    }
-
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);

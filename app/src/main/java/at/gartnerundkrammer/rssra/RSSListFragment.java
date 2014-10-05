@@ -9,6 +9,7 @@ import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.ListAdapter;
 import android.widget.TextView;
 
@@ -24,7 +25,7 @@ import at.gartnerundkrammer.rssra.dummy.DummyContent;
  * Activities containing this fragment MUST implement the {@link Callbacks}
  * interface.
  */
-public class RSSListFragment extends Fragment implements AbsListView.OnItemClickListener {
+public class RSSListFragment extends Fragment implements AbsListView.OnItemClickListener, View.OnClickListener {
 
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -34,6 +35,8 @@ public class RSSListFragment extends Fragment implements AbsListView.OnItemClick
     // TODO: Rename and change types of parameters
     private String mParam1;
     private String mParam2;
+
+    private Button enterManually;
 
     private OnRSSListFragmentInteractionListener mListener;
 
@@ -56,13 +59,6 @@ public class RSSListFragment extends Fragment implements AbsListView.OnItemClick
         args.putString(ARG_PARAM2, param2);
         fragment.setArguments(args);
         return fragment;
-    }
-
-    /**
-     * Mandatory empty constructor for the fragment manager to instantiate the
-     * fragment (e.g. upon screen orientation changes).
-     */
-    public RSSListFragment() {
     }
 
     @Override
@@ -94,6 +90,7 @@ public class RSSListFragment extends Fragment implements AbsListView.OnItemClick
         // TODO: Change Adapter to display your content
         mAdapter = new ArrayAdapter<DummyContent.DummyItem>(getActivity(),
                 android.R.layout.simple_list_item_1, android.R.id.text1, DummyContent.ITEMS);
+
     }
 
     @Override
@@ -107,6 +104,9 @@ public class RSSListFragment extends Fragment implements AbsListView.OnItemClick
 
         // Set OnItemClickListener so we can be notified on item clicks
         mListView.setOnItemClickListener(this);
+
+        enterManually = (Button) view.findViewById(R.id.RSSList_enterManually);
+        enterManually.setOnClickListener(this);
 
         return view;
     }
@@ -130,6 +130,16 @@ public class RSSListFragment extends Fragment implements AbsListView.OnItemClick
 
         if (emptyText instanceof TextView) {
             ((TextView) emptyView).setText(emptyText);
+        }
+    }
+
+
+    @Override
+    public void onClick(View view) {
+        switch (view.getId()) {
+            case R.id.RSSList_enterManually:
+                ((MainActivity)getActivity()).changeFragment(new SubscribeToRSSFragment());
+                break;
         }
     }
 

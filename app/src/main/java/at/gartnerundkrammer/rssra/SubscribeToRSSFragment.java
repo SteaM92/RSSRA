@@ -48,9 +48,6 @@ public class SubscribeToRSSFragment extends Fragment {
         fragment.setArguments(args);
         return fragment;
     }
-    public SubscribeToRSSFragment() {
-        // Required empty public constructor
-    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
