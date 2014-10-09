@@ -7,7 +7,9 @@ import android.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.Toast;
 
 
 /**
@@ -19,7 +21,7 @@ import android.view.ViewGroup;
  * create an instance of this fragment.
  *
  */
-public class SubscribeToRSSFragment extends Fragment {
+public class SubscribeToRSSFragment extends Fragment implements View.OnClickListener{
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
@@ -28,6 +30,10 @@ public class SubscribeToRSSFragment extends Fragment {
     // TODO: Rename and change types of parameters
     private String mParam1;
     private String mParam2;
+
+    private Button cancelButton;
+    private Button addButton;
+    private EditText addRSSEditText;
 
     private OnSubscribeToRSSFragmentInteractionListener mListener;
 
@@ -62,7 +68,17 @@ public class SubscribeToRSSFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_subscribe_to_rss, container, false);
+        View view = inflater.inflate(R.layout.fragment_subscribe_to_rss, container, false);
+
+        cancelButton = (Button) view.findViewById(R.id.SubscribeToRSS_cancelButton);
+        cancelButton.setOnClickListener(this);
+
+        addButton = (Button) view.findViewById(R.id.SubscribeToRSS_addButton);
+        addButton.setOnClickListener(this);
+
+        addRSSEditText = (EditText) view.findViewById(R.id.SubscribeToRSS_addRSSTextfield);
+
+        return view;
     }
 
     // TODO: Rename method, update argument and hook method into UI event
@@ -87,6 +103,24 @@ public class SubscribeToRSSFragment extends Fragment {
     public void onDetach() {
         super.onDetach();
         mListener = null;
+    }
+
+    @Override
+    public void onClick(View view) {
+        switch (view.getId()) {
+            case R.id.SubscribeToRSS_addButton:
+                if (addRSSEditText.getText().length()>0) {
+
+                }else {
+                    Toast.makeText(getActivity(), "Please fill out the field.", Toast.LENGTH_SHORT).show();
+                }
+                //((MainActivity)getActivity()).changeFragment(new SubscribeToRSSFragment());
+                break;
+
+            case R.id.SubscribeToRSS_cancelButton:
+                ((MainActivity)getActivity()).changeFragment(new RSSListFragment());
+                break;
+        }
     }
 
     /**
