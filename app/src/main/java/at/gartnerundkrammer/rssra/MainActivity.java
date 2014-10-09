@@ -6,17 +6,54 @@ import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Toast;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import at.diamonddogs.data.dataobjects.WebRequest;
+import at.diamonddogs.service.net.HttpServiceAssister;
+import at.diamonddogs.service.processor.ServiceProcessorMessageUtil;
 
 
 public class MainActivity extends Activity implements PostingsListFragment.OnPostingsListFragmentInteractionListener, RSSListFragment.OnRSSListFragmentInteractionListener, SubscribeToRSSFragment.OnSubscribeToRSSFragmentInteractionListener{
+
+    private HttpServiceAssister assister;
+    private List<RssFeed> feeds;
+    private static final Logger LOGGER = LoggerFactory.getLogger(RssProcessor.class.getSimpleName());
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         changeFragment(new PostingsListFragment());
+        assister = new HttpServiceAssister(this);
+        feeds = new ArrayList<RssFeed>();
+
+        RssFeed testfeed = new RssFeed();
+        testfeed.setSource("http://heise.de.feedsportal.com/c/35207/f/653902/index.rss");
+        feeds.add(testfeed);
+    }
+
+    @Override
+    public void onResume()
+    {
+        super.onResume();
+        assister.bindService();
+    }
+
+    @Override
+    public void onPause()
+    {
+        super.onPause();
+        assister.unbindService();
     }
 
     public void changeFragment(Fragment fragment) {
@@ -27,6 +64,15 @@ public class MainActivity extends Activity implements PostingsListFragment.OnPos
         transaction.commit();
     }
 
+    public void startSync()
+    {
+        for(RssFeed feed : feeds) {
+            WebRequest asyncRequest = new WebRequest();
+            asyncRequest.setUrl(feed.getSource());
+            asyncRequest.setProcessorId(RssProcessor.ID);
+            assister.runWebRequest(new RssHandler(), asyncRequest, new RssProcessor());
+        }
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -51,6 +97,9 @@ public class MainActivity extends Activity implements PostingsListFragment.OnPos
                 changeFragment(new RSSListFragment());
                 return true;
 
+            case R.id.action_sync:
+                startSync();
+
             case R.id.action_about:
                 return true;
 
@@ -72,5 +121,43 @@ public class MainActivity extends Activity implements PostingsListFragment.OnPos
     @Override
     public void onSubscribeToRSSFragmentInteraction(Uri uri) {
 
+    }
+
+    private class RssHandler extends Handler
+    {
+        @Override
+        public void handleMessage(Message message)
+        {
+            super.handleMessage(message);
+            if (ServiceProcessorMessageUtil.isFromProcessor(message, RssProcessor.ID))
+            {
+                if (ServiceProcessorMessageUtil.isSuccessful(message))
+                {
+                    LOGGER.trace("feed fetched.");
+                    int insertIndex = -1;
+                    RssFeed feed = (RssFeed)message.obj;
+                    for (int i=0; i<feeds.size(); i++)
+                    {
+                        if (feeds.get(i).getSource() == feed.getSource())
+                        {
+                            insertIndex = i;
+                            feeds.remove(i);
+                            break;
+                        }
+                    }
+
+                    if (insertIndex >= 0)
+                        feeds.add(insertIndex, feed);
+                    else
+                        feeds.add(feed);
+                }
+                else
+                {
+                    String host = ServiceProcessorMessageUtil.getWebRequest(message).getUrl().getHost();
+                    Toast.makeText(MainActivity.this, String.format("Failed to fetch feed from %s", host), Toast.LENGTH_LONG).show();
+                    LOGGER.error(String.format("android.http HTTP Request to %s failed", host));
+                }
+            }
+        }
     }
 }

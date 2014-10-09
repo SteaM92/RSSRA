@@ -21,6 +21,8 @@ public class RssProcessor extends XMLProcessor<RssFeed>
 {
     private static final Logger LOGGER = LoggerFactory.getLogger(RssProcessor.class.getSimpleName());
 
+    public static final int ID = 554498;
+
     @Override
     protected RssFeed parse(Document document) {
         NodeList list = document.getElementsByTagName("channel");
@@ -101,6 +103,6 @@ public class RssProcessor extends XMLProcessor<RssFeed>
 
     @Override
     public int getProcessorID() {
-        return 554498;
+        return ID;
     }
 }

@@ -12,5 +12,5 @@
     <string name="action_about">About</string>
     <string name="RSSList_enterManually_Button">Enter manually</string>
     <string name="title_activity_my">MyActivity</string>
-
+    <string name="action_sync">Syncronize</string>
 </resources>
