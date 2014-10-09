@@ -118,6 +118,7 @@ public class SubscribeToRSSFragment extends Fragment implements View.OnClickList
                 break;
 
             case R.id.SubscribeToRSS_cancelButton:
+                //TODO: Remove dependency on RSSListFragement; use BackStack instead
                 ((MainActivity)getActivity()).changeFragment(new RSSListFragment());
                 break;
         }

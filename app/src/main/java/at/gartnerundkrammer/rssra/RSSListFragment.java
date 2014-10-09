@@ -14,6 +14,8 @@ import android.widget.ListAdapter;
 import android.widget.TextView;
 
 
+import java.util.List;
+
 import at.gartnerundkrammer.rssra.dummy.DummyContent;
 
 /**
@@ -27,14 +29,7 @@ import at.gartnerundkrammer.rssra.dummy.DummyContent;
  */
 public class RSSListFragment extends Fragment implements AbsListView.OnItemClickListener, View.OnClickListener {
 
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
-
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
+    private List<RssFeed> list = null;
 
     private Button enterManually;
 
@@ -51,14 +46,12 @@ public class RSSListFragment extends Fragment implements AbsListView.OnItemClick
      */
     private ListAdapter mAdapter;
 
-    // TODO: Rename and change types of parameters
-    public static RSSListFragment newInstance(String param1, String param2) {
-        RSSListFragment fragment = new RSSListFragment();
-        Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
-        fragment.setArguments(args);
-        return fragment;
+    public void setList(List<RssFeed> list)
+    {
+        if (list == null)
+            throw new IllegalArgumentException("list must not be null");
+
+        this.list = list;
     }
 
     @Override
@@ -82,14 +75,11 @@ public class RSSListFragment extends Fragment implements AbsListView.OnItemClick
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
-        }
-
-        // TODO: Change Adapter to display your content
-        mAdapter = new ArrayAdapter<DummyContent.DummyItem>(getActivity(),
-                android.R.layout.simple_list_item_1, android.R.id.text1, DummyContent.ITEMS);
+        if (list == null)
+            throw new IllegalStateException("setList() was not called");
+        
+        mAdapter = new ArrayAdapter<RssFeed>(getActivity(),
+                android.R.layout.simple_list_item_1, android.R.id.text1, list);
 
     }
 

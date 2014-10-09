@@ -33,9 +33,13 @@ public class MainActivity extends Activity implements PostingsListFragment.OnPos
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        changeFragment(new PostingsListFragment());
-        assister = new HttpServiceAssister(this);
+
         feeds = new ArrayList<RssFeed>();
+
+        RSSListFragment fragment = new RSSListFragment();
+        fragment.setList(feeds);
+        changeFragment(fragment);
+        assister = new HttpServiceAssister(this);
 
         RssFeed testfeed = new RssFeed();
         testfeed.setSource("http://heise.de.feedsportal.com/c/35207/f/653902/index.rss");
@@ -94,7 +98,8 @@ public class MainActivity extends Activity implements PostingsListFragment.OnPos
                 return true;
 
             case R.id.action_addRSS:
-                changeFragment(new RSSListFragment());
+                SubscribeToRSSFragment fragment = new SubscribeToRSSFragment();
+                changeFragment(fragment);
                 return true;
 
             case R.id.action_sync:

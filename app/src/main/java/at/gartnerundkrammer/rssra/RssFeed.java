@@ -102,4 +102,13 @@ public class RssFeed {
     public void setCopyright(String copyright) {
         this.copyright = copyright;
     }
+
+    @Override
+    public String toString()
+    {
+        if (title == null)
+            return source;
+        else
+            return String.format("%s (%s)", title, source);
+    }
 }
