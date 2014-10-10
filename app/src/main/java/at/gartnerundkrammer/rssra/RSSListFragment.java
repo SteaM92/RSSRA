@@ -3,6 +3,7 @@ package at.gartnerundkrammer.rssra;
 import android.app.Activity;
 import android.os.Bundle;
 import android.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -107,6 +108,7 @@ public class RSSListFragment extends Fragment implements AbsListView.OnItemClick
             // Notify the active callbacks interface (the activity, if the
             // fragment is attached to one) that an item has been selected.
             mListener.onRSSListFragmentInteraction(DummyContent.ITEMS.get(position).id);
+            Log.v("ja", (DummyContent.ITEMS.get(position).content));
         }
     }
 

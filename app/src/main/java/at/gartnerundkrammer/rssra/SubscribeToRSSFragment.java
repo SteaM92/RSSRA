@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.net.Uri;
 import android.os.Bundle;
 import android.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -34,6 +35,8 @@ public class SubscribeToRSSFragment extends Fragment implements View.OnClickList
     private Button cancelButton;
     private Button addButton;
     private EditText addRSSEditText;
+
+    private MainActivity mainActivity;
 
     private OnSubscribeToRSSFragmentInteractionListener mListener;
 
@@ -91,6 +94,7 @@ public class SubscribeToRSSFragment extends Fragment implements View.OnClickList
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
+        mainActivity = (MainActivity)activity;
         try {
             mListener = (OnSubscribeToRSSFragmentInteractionListener) activity;
         } catch (ClassCastException e) {
@@ -110,16 +114,16 @@ public class SubscribeToRSSFragment extends Fragment implements View.OnClickList
         switch (view.getId()) {
             case R.id.SubscribeToRSS_addButton:
                 if (addRSSEditText.getText().length()>0) {
-
+                    mainActivity.addRSSToList(addRSSEditText.getText().toString());
+                    Toast.makeText(getActivity(), "RSS added", Toast.LENGTH_SHORT).show();
+                    addRSSEditText.setText("");
                 }else {
                     Toast.makeText(getActivity(), "Please fill out the field.", Toast.LENGTH_SHORT).show();
                 }
-                //((MainActivity)getActivity()).changeFragment(new SubscribeToRSSFragment());
                 break;
 
             case R.id.SubscribeToRSS_cancelButton:
-                //TODO: Remove dependency on RSSListFragement; use BackStack instead
-                ((MainActivity)getActivity()).changeFragment(new RSSListFragment());
+                mainActivity.changeFragment(new RSSListFragment());
                 break;
         }
     }
