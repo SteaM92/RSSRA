@@ -8,6 +8,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
@@ -16,6 +17,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import at.diamonddogs.data.dataobjects.WebRequest;
@@ -36,13 +38,23 @@ public class MainActivity extends Activity implements PostingsListFragment.OnPos
 
         feeds = new ArrayList<RssFeed>();
 
-        RSSListFragment fragment = new RSSListFragment();
-        fragment.setList(feeds);
-        changeFragment(fragment);
         assister = new HttpServiceAssister(this);
 
+        initTestFeed();
+
+        changeToListFragment(new RSSListFragment(), feeds);
+    }
+
+    private void initTestFeed() {
         RssFeed testfeed = new RssFeed();
         testfeed.setSource("http://heise.de.feedsportal.com/c/35207/f/653902/index.rss");
+
+        RssFeedItem item = new RssFeedItem("title", "des", "asd", "title", new Date(), "asd");
+        RssFeedItem item2 = new RssFeedItem("title2", "des2", "asd2", "title2", new Date(), "asd2");
+        List<RssFeedItem> list = new ArrayList<>();
+        list.add(item);
+        list.add(item2);
+        testfeed.setItems(list);
         feeds.add(testfeed);
     }
 
@@ -66,6 +78,16 @@ public class MainActivity extends Activity implements PostingsListFragment.OnPos
         transaction.replace(R.id.fragment_place, fragment);
         transaction.addToBackStack(((Object) fragment).getClass().getName());
         transaction.commit();
+    }
+
+    public void changeToListFragment(ListFragementInterface fr, List list) {
+        fr.setListData(list);
+        changeFragment(fr.getFragment());
+    }
+
+    public void changeToLastFragment() {
+        getFragmentManager().popBackStack();
+
     }
 
     public void startSync()
@@ -126,6 +148,13 @@ public class MainActivity extends Activity implements PostingsListFragment.OnPos
     @Override
     public void onSubscribeToRSSFragmentInteraction(Uri uri) {
 
+    }
+
+    public void addRSSToList(String source) {
+        RssFeed f = new RssFeed();
+        f.setSource(source);
+        Log.v("v", "source added:" + source);
+        feeds.add(f);
     }
 
     private class RssHandler extends Handler

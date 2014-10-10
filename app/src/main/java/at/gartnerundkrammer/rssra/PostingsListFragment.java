@@ -13,27 +13,23 @@ import android.widget.ListAdapter;
 import android.widget.TextView;
 
 
+import java.util.List;
+
 import at.gartnerundkrammer.rssra.dummy.DummyContent;
 
 /**
- * A fragment representing a list of Items.
+ * PostingsListFragment shows all postings from one RSS Feed
  * <p />
  * Large screen devices (such as tablets) are supported by replacing the ListView
  * with a GridView.
  * <p />
- * Activities containing this fragment MUST implement the {@link Callbacks}
  * interface.
  */
-public class PostingsListFragment extends Fragment implements AbsListView.OnItemClickListener {
+public class PostingsListFragment extends Fragment implements AbsListView.OnItemClickListener, ListFragementInterface {
 
     // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
 
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
+    private List<RssFeedItem> list = null;
 
     private OnPostingsListFragmentInteractionListener mListener;
 
@@ -47,16 +43,6 @@ public class PostingsListFragment extends Fragment implements AbsListView.OnItem
      * Views.
      */
     private ListAdapter mAdapter;
-
-    // TODO: Rename and change types of parameters
-    public static PostingsListFragment newInstance(String param1, String param2) {
-        PostingsListFragment fragment = new PostingsListFragment();
-        Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
-        fragment.setArguments(args);
-        return fragment;
-    }
 
     @Override
     public void onAttach(Activity activity) {
@@ -79,14 +65,12 @@ public class PostingsListFragment extends Fragment implements AbsListView.OnItem
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
-        }
+        if (list == null)
+            throw new IllegalStateException("setList() was not called");
 
-        // TODO: Change Adapter to display your content
-        mAdapter = new ArrayAdapter<DummyContent.DummyItem>(getActivity(),
-                android.R.layout.simple_list_item_1, android.R.id.text1, DummyContent.ITEMS);
+        mAdapter = new ArrayAdapter<RssFeedItem>(getActivity(),
+                android.R.layout.simple_list_item_1, android.R.id.text1, list);
+
     }
 
     @Override
@@ -124,6 +108,19 @@ public class PostingsListFragment extends Fragment implements AbsListView.OnItem
         if (emptyText instanceof TextView) {
             ((TextView) emptyView).setText(emptyText);
         }
+    }
+
+    @Override
+    public void setListData(List list) {
+        if (list == null)
+            throw new IllegalArgumentException("list must not be null");
+
+        this.list = list;
+    }
+
+    @Override
+    public Fragment getFragment() {
+        return this;
     }
 
     /**

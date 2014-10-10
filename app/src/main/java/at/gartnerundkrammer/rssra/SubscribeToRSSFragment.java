@@ -14,7 +14,7 @@ import android.widget.Toast;
 
 
 /**
- * A simple {@link Fragment} subclass.
+ * SubscribeToRSSFragment shows the GUI to subscribe to a RSS Feed
  * Activities that contain this fragment must implement the
  * {@link at.gartnerundkrammer.rssra.SubscribeToRSSFragment.OnSubscribeToRSSFragmentInteractionListener} interface
  * to handle interaction events.
@@ -117,13 +117,14 @@ public class SubscribeToRSSFragment extends Fragment implements View.OnClickList
                     mainActivity.addRSSToList(addRSSEditText.getText().toString());
                     Toast.makeText(getActivity(), "RSS added", Toast.LENGTH_SHORT).show();
                     addRSSEditText.setText("");
+                    mainActivity.changeToLastFragment();
                 }else {
                     Toast.makeText(getActivity(), "Please fill out the field.", Toast.LENGTH_SHORT).show();
                 }
                 break;
 
             case R.id.SubscribeToRSS_cancelButton:
-                mainActivity.changeFragment(new RSSListFragment());
+                mainActivity.changeToLastFragment();
                 break;
         }
     }

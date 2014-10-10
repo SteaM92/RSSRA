@@ -20,19 +20,17 @@ import java.util.List;
 import at.gartnerundkrammer.rssra.dummy.DummyContent;
 
 /**
- * A fragment representing a list of Items.
+ * RSSListFragment shows a list of your current RSS Feeds
  * <p />
  * Large screen devices (such as tablets) are supported by replacing the ListView
  * with a GridView.
  * <p />
- * Activities containing this fragment MUST implement the {@link Callbacks}
- * interface.
  */
-public class RSSListFragment extends Fragment implements AbsListView.OnItemClickListener, View.OnClickListener {
+public class RSSListFragment extends Fragment implements AbsListView.OnItemClickListener, ListFragementInterface {
 
     private List<RssFeed> list = null;
 
-    private Button enterManually;
+    private MainActivity mainActivity;
 
     private OnRSSListFragmentInteractionListener mListener;
 
@@ -47,17 +45,10 @@ public class RSSListFragment extends Fragment implements AbsListView.OnItemClick
      */
     private ListAdapter mAdapter;
 
-    public void setList(List<RssFeed> list)
-    {
-        if (list == null)
-            throw new IllegalArgumentException("list must not be null");
-
-        this.list = list;
-    }
-
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
+        mainActivity = (MainActivity) activity;
         try {
             mListener = (OnRSSListFragmentInteractionListener) activity;
         } catch (ClassCastException e) {
@@ -96,9 +87,6 @@ public class RSSListFragment extends Fragment implements AbsListView.OnItemClick
         // Set OnItemClickListener so we can be notified on item clicks
         mListView.setOnItemClickListener(this);
 
-        enterManually = (Button) view.findViewById(R.id.RSSList_enterManually);
-        enterManually.setOnClickListener(this);
-
         return view;
     }
 
@@ -107,8 +95,9 @@ public class RSSListFragment extends Fragment implements AbsListView.OnItemClick
         if (null != mListener) {
             // Notify the active callbacks interface (the activity, if the
             // fragment is attached to one) that an item has been selected.
-            mListener.onRSSListFragmentInteraction(DummyContent.ITEMS.get(position).id);
-            Log.v("ja", (DummyContent.ITEMS.get(position).content));
+           // mListener.onRSSListFragmentInteraction(DummyContent.ITEMS.get(position).id);
+            //Log.v("ja", "pos:"+position+", id"+id);
+            mainActivity.changeToListFragment(new PostingsListFragment(), list.get(position).getItems());
         }
     }
 
@@ -125,14 +114,17 @@ public class RSSListFragment extends Fragment implements AbsListView.OnItemClick
         }
     }
 
+    @Override
+    public void setListData(List list) {
+        if (list == null)
+            throw new IllegalArgumentException("list must not be null");
+
+        this.list = list;
+    }
 
     @Override
-    public void onClick(View view) {
-        switch (view.getId()) {
-            case R.id.RSSList_enterManually:
-                ((MainActivity)getActivity()).changeFragment(new SubscribeToRSSFragment());
-                break;
-        }
+    public Fragment getFragment() {
+        return this;
     }
 
     /**

@@ -61,4 +61,10 @@ public class RssFeedItem {
     public void setPubDate(Date pubDate) {
         this.pubDate = pubDate;
     }
+
+    @Override
+    public String toString()
+    {
+        return String.format("%s", title);
+    }
 }
