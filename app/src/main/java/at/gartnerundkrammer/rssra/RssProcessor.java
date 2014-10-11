@@ -25,6 +25,8 @@ public class RssProcessor extends XMLProcessor<RssFeed>
 
     @Override
     protected RssFeed parse(Document document) {
+        LOGGER.trace("Start processing feed");
+
         NodeList list = document.getElementsByTagName("channel");
         if (list.getLength() != 1)
             return null;
@@ -38,26 +40,29 @@ public class RssProcessor extends XMLProcessor<RssFeed>
         for (int i=0; i<channel.getChildNodes().getLength(); i++)
         {
             Node n = channel.getChildNodes().item(i);
+            if (n.getChildNodes().getLength() < 1)
+                continue;
+
             switch (n.getNodeName())
             {
                 case "title":
-                    feed.setTitle(n.getNodeValue());
+                    feed.setTitle(n.getChildNodes().item(0).getNodeValue());
                     break;
                 case "description":
-                    feed.setDescription(n.getNodeValue());
+                    feed.setDescription(n.getChildNodes().item(0).getNodeValue());
                     break;
                 case "link":
-                    feed.setLink(n.getNodeValue());
+                    feed.setLink(n.getChildNodes().item(0).getNodeValue());
                     break;
                 case "language":
-                    feed.setLanguage((n.getNodeValue()));
+                    feed.setLanguage((n.getChildNodes().item(0).getNodeValue()));
                     break;
                 case "copyright":
-                    feed.setCopyright(n.getNodeValue());
+                    feed.setCopyright(n.getChildNodes().item(0).getNodeValue());
                     break;
                 case "pubDate":
                     try {
-                        feed.setPubDate(df.parse(n.getNodeValue()));
+                        feed.setPubDate(df.parse(n.getChildNodes().item(0).getNodeValue()));
                     } catch (ParseException e) {
                         LOGGER.warn("Unable to parse pubDate", e);
                     }
@@ -68,36 +73,43 @@ public class RssProcessor extends XMLProcessor<RssFeed>
         NodeList items = document.getElementsByTagName("item");
         for (int i=0; i<items.getLength(); i++)
         {
+            RssFeedItem item = new RssFeedItem();
+
             for (int j=0; j<items.item(i).getChildNodes().getLength(); j++)
             {
                 Node n = items.item(i).getChildNodes().item(j);
-                RssFeedItem item = new RssFeedItem();
+                if (n.getChildNodes().getLength() < 1)
+                    continue;
+
                 switch (n.getNodeName())
                 {
                     case "title":
-                        item.setTitle(n.getNodeValue());
+                        item.setTitle(n.getChildNodes().item(0).getNodeValue());
                         break;
                     case "description":
-                        item.setDescription(n.getNodeValue());
+                        item.setDescription(n.getChildNodes().item(0).getNodeValue());
                         break;
                     case "link":
-                        item.setLink(n.getNodeValue());
+                        item.setLink(n.getChildNodes().item(0).getNodeValue());
                         break;
                     case "author":
-                        item.setAuthor(n.getNodeValue());
+                        item.setAuthor(n.getChildNodes().item(0).getNodeValue());
                         break;
                     case "pubDate":
                         try {
-                            item.setPubDate(df.parse(n.getNodeValue()));
+                            item.setPubDate(df.parse(n.getChildNodes().item(0).getNodeValue()));
                         } catch (ParseException e) {
                             LOGGER.warn("Unable to parse pubDate", e);
                         }
                         break;
                 }
-                feed.addItem(item);
             }
+
+            if (item.getTitle() != null && item.getLink() != null)
+                feed.addItem(item);
         }
 
+        LOGGER.trace("Processing finished");
         return feed;
     }
 

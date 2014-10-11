@@ -9,10 +9,6 @@
         android:title="@string/action_addRSS"
         android:orderInCategory="90"
         android:showAsAction="never" />
-    <item android:id="@+id/action_sync"
-        android:title="@string/action_sync"
-        android:orderInCategory="90"
-        android:showAsAction="never" />
     <item android:id="@+id/action_about"
         android:title="@string/action_about"
         android:orderInCategory="100"

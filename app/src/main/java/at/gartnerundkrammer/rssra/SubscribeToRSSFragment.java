@@ -12,6 +12,11 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.List;
+
 
 /**
  * SubscribeToRSSFragment shows the GUI to subscribe to a RSS Feed
@@ -22,49 +27,24 @@ import android.widget.Toast;
  * create an instance of this fragment.
  *
  */
-public class SubscribeToRSSFragment extends Fragment implements View.OnClickListener{
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
+public class SubscribeToRSSFragment extends Fragment implements View.OnClickListener, ListFragmentInterface {
 
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
+    private static final Logger LOGGER = LoggerFactory.getLogger(SubscribeToRSSFragment.class.getSimpleName());
 
     private Button cancelButton;
     private Button addButton;
     private EditText addRSSEditText;
 
-    private MainActivity mainActivity;
-
     private OnSubscribeToRSSFragmentInteractionListener mListener;
 
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
-     * @return A new instance of fragment SubscribeToRSSFragment.
-     */
-    // TODO: Rename and change types and number of parameters
-    public static SubscribeToRSSFragment newInstance(String param1, String param2) {
-        SubscribeToRSSFragment fragment = new SubscribeToRSSFragment();
-        Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
-        fragment.setArguments(args);
-        return fragment;
-    }
+    private List<RssFeed> list = null;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
-        }
+
+        if (list == null)
+            throw new IllegalStateException("setList() was not called");
     }
 
     @Override
@@ -94,7 +74,7 @@ public class SubscribeToRSSFragment extends Fragment implements View.OnClickList
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
-        mainActivity = (MainActivity)activity;
+        //mainActivity = (MainActivity)activity;
         try {
             mListener = (OnSubscribeToRSSFragmentInteractionListener) activity;
         } catch (ClassCastException e) {
@@ -114,19 +94,39 @@ public class SubscribeToRSSFragment extends Fragment implements View.OnClickList
         switch (view.getId()) {
             case R.id.SubscribeToRSS_addButton:
                 if (addRSSEditText.getText().length()>0) {
-                    mainActivity.addRSSToList(addRSSEditText.getText().toString());
+                    addRSSToList(addRSSEditText.getText().toString());
                     Toast.makeText(getActivity(), "RSS added", Toast.LENGTH_SHORT).show();
                     addRSSEditText.setText("");
-                    mainActivity.changeToLastFragment();
+                    FragmentUtility.changeToLastFragment(getActivity());
                 }else {
                     Toast.makeText(getActivity(), "Please fill out the field.", Toast.LENGTH_SHORT).show();
                 }
                 break;
 
             case R.id.SubscribeToRSS_cancelButton:
-                mainActivity.changeToLastFragment();
+                FragmentUtility.changeToLastFragment(getActivity());
                 break;
         }
+    }
+
+    @Override
+    public void setListData(List list) {
+        if (list == null)
+            throw new IllegalArgumentException("list must not be null");
+
+        this.list = list;
+    }
+
+    @Override
+    public Fragment getFragment() {
+        return this;
+    }
+
+    public void addRSSToList(String source) {
+        RssFeed f = new RssFeed();
+        f.setSource(source);
+        LOGGER.trace("v", "added:" + source);
+        list.add(f);
     }
 
     /**

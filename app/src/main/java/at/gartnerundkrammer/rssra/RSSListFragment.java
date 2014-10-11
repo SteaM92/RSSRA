@@ -3,21 +3,30 @@ package at.gartnerundkrammer.rssra;
 import android.app.Activity;
 import android.os.Bundle;
 import android.app.Fragment;
-import android.util.Log;
+import android.os.Handler;
+import android.os.Message;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.ListAdapter;
 import android.widget.TextView;
+import android.widget.Toast;
 
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
-import at.gartnerundkrammer.rssra.dummy.DummyContent;
+import at.diamonddogs.data.dataobjects.WebRequest;
+import at.diamonddogs.service.net.HttpServiceAssister;
+import at.diamonddogs.service.processor.ServiceProcessorMessageUtil;
 
 /**
  * RSSListFragment shows a list of your current RSS Feeds
@@ -26,11 +35,12 @@ import at.gartnerundkrammer.rssra.dummy.DummyContent;
  * with a GridView.
  * <p />
  */
-public class RSSListFragment extends Fragment implements AbsListView.OnItemClickListener, ListFragementInterface {
+public class RSSListFragment extends Fragment implements AbsListView.OnItemClickListener, ListFragmentInterface {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(RSSListFragment.class.getSimpleName());
 
     private List<RssFeed> list = null;
-
-    private MainActivity mainActivity;
+    private HttpServiceAssister assister;
 
     private OnRSSListFragmentInteractionListener mListener;
 
@@ -43,12 +53,13 @@ public class RSSListFragment extends Fragment implements AbsListView.OnItemClick
      * The Adapter which will be used to populate the ListView/GridView with
      * Views.
      */
-    private ListAdapter mAdapter;
+    private ArrayAdapter<RssFeed> mAdapter;
 
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
-        mainActivity = (MainActivity) activity;
+        assister = new HttpServiceAssister(activity);
+
         try {
             mListener = (OnRSSListFragmentInteractionListener) activity;
         } catch (ClassCastException e) {
@@ -66,13 +77,27 @@ public class RSSListFragment extends Fragment implements AbsListView.OnItemClick
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setHasOptionsMenu(true);
 
         if (list == null)
             throw new IllegalStateException("setList() was not called");
         
         mAdapter = new ArrayAdapter<RssFeed>(getActivity(),
                 android.R.layout.simple_list_item_1, android.R.id.text1, list);
+    }
 
+    @Override
+    public void onResume()
+    {
+        assister.bindService();
+        super.onResume();
+    }
+
+    @Override
+    public void onPause()
+    {
+        assister.unbindService();
+        super.onPause();
     }
 
     @Override
@@ -91,14 +116,36 @@ public class RSSListFragment extends Fragment implements AbsListView.OnItemClick
     }
 
     @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater)
+    {
+        inflater.inflate(R.menu.rsslist, menu);
+        super.onCreateOptionsMenu(menu, inflater);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item)
+    {
+        int id = item.getItemId();
+        switch (id) {
+            case R.id.action_sync:
+                startSync();
+                return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         if (null != mListener) {
             // Notify the active callbacks interface (the activity, if the
             // fragment is attached to one) that an item has been selected.
            // mListener.onRSSListFragmentInteraction(DummyContent.ITEMS.get(position).id);
-            //Log.v("ja", "pos:"+position+", id"+id);
-            mainActivity.changeToListFragment(new PostingsListFragment(), list.get(position).getItems());
         }
+
+        //Log.v("ja", "pos:"+position+", id"+id);
+        PostingsListFragment fragment = new PostingsListFragment();
+        fragment.setListData(list.get(position).getItems());
+        FragmentUtility.changeFragment(getActivity(), fragment);
     }
 
     /**
@@ -142,4 +189,55 @@ public class RSSListFragment extends Fragment implements AbsListView.OnItemClick
         public void onRSSListFragmentInteraction(String id);
     }
 
+
+    public void startSync()
+    {
+        for(RssFeed feed : list) {
+            WebRequest asyncRequest = new WebRequest();
+            asyncRequest.setUrl(feed.getSource());
+            asyncRequest.setProcessorId(RssProcessor.ID);
+            assister.runWebRequest(new RssHandler(), asyncRequest, new RssProcessor());
+        }
+    }
+
+    private class RssHandler extends Handler
+    {
+        @Override
+        public void handleMessage(Message message)
+        {
+            super.handleMessage(message);
+            if (ServiceProcessorMessageUtil.isFromProcessor(message, RssProcessor.ID))
+            {
+                if (ServiceProcessorMessageUtil.isSuccessful(message))
+                {
+                    LOGGER.trace("feed fetched.");
+                    int insertIndex = -1;
+                    RssFeed feed = (RssFeed)message.obj;
+                    feed.setSource(ServiceProcessorMessageUtil.getWebRequest(message).getUrl().toString());
+                    for (int i=0; i<list.size(); i++)
+                    {
+                        if (list.get(i).getSource().equals(feed.getSource()))
+                        {
+                            insertIndex = i;
+                            list.remove(i);
+                            break;
+                        }
+                    }
+
+                    if (insertIndex >= 0)
+                        list.add(insertIndex, feed);
+                    else
+                        list.add(feed);
+
+                    mAdapter.notifyDataSetChanged();
+                }
+                else
+                {
+                    String host = ServiceProcessorMessageUtil.getWebRequest(message).getUrl().getHost();
+                    Toast.makeText(getActivity(), String.format("Failed to fetch feed from %s", host), Toast.LENGTH_LONG).show();
+                    LOGGER.error(String.format("android.http HTTP Request to %s failed", host));
+                }
+            }
+        }
+    }
 }

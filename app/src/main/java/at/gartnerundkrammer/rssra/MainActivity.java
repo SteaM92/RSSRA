@@ -21,15 +21,16 @@ import java.util.Date;
 import java.util.List;
 
 import at.diamonddogs.data.dataobjects.WebRequest;
+import at.diamonddogs.net.SSLHelper;
 import at.diamonddogs.service.net.HttpServiceAssister;
 import at.diamonddogs.service.processor.ServiceProcessorMessageUtil;
 
 
 public class MainActivity extends Activity implements PostingsListFragment.OnPostingsListFragmentInteractionListener, RSSListFragment.OnRSSListFragmentInteractionListener, SubscribeToRSSFragment.OnSubscribeToRSSFragmentInteractionListener{
 
-    private HttpServiceAssister assister;
-    private List<RssFeed> feeds;
     private static final Logger LOGGER = LoggerFactory.getLogger(RssProcessor.class.getSimpleName());
+
+    private List<RssFeed> feeds;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,16 +39,17 @@ public class MainActivity extends Activity implements PostingsListFragment.OnPos
 
         feeds = new ArrayList<RssFeed>();
 
-        assister = new HttpServiceAssister(this);
+        SSLHelper.getInstance().initSSLFactoryJava(null, -1, null);
 
         initTestFeed();
 
-        changeToListFragment(new RSSListFragment(), feeds);
+        FragmentUtility.changeToListFragment(this, new RSSListFragment(), feeds);
     }
 
     private void initTestFeed() {
         RssFeed testfeed = new RssFeed();
         testfeed.setSource("http://heise.de.feedsportal.com/c/35207/f/653902/index.rss");
+        testfeed.setTitle("Heise");
 
         RssFeedItem item = new RssFeedItem("title", "des", "asd", "title", new Date(), "asd");
         RssFeedItem item2 = new RssFeedItem("title2", "des2", "asd2", "title2", new Date(), "asd2");
@@ -62,42 +64,12 @@ public class MainActivity extends Activity implements PostingsListFragment.OnPos
     public void onResume()
     {
         super.onResume();
-        assister.bindService();
     }
 
     @Override
     public void onPause()
     {
         super.onPause();
-        assister.unbindService();
-    }
-
-    public void changeFragment(Fragment fragment) {
-        FragmentManager fm = getFragmentManager();
-        FragmentTransaction transaction = fm.beginTransaction();
-        transaction.replace(R.id.fragment_place, fragment);
-        transaction.addToBackStack(((Object) fragment).getClass().getName());
-        transaction.commit();
-    }
-
-    public void changeToListFragment(ListFragementInterface fr, List list) {
-        fr.setListData(list);
-        changeFragment(fr.getFragment());
-    }
-
-    public void changeToLastFragment() {
-        getFragmentManager().popBackStack();
-
-    }
-
-    public void startSync()
-    {
-        for(RssFeed feed : feeds) {
-            WebRequest asyncRequest = new WebRequest();
-            asyncRequest.setUrl(feed.getSource());
-            asyncRequest.setProcessorId(RssProcessor.ID);
-            assister.runWebRequest(new RssHandler(), asyncRequest, new RssProcessor());
-        }
     }
 
     @Override
@@ -120,16 +92,11 @@ public class MainActivity extends Activity implements PostingsListFragment.OnPos
                 return true;
 
             case R.id.action_addRSS:
-                SubscribeToRSSFragment fragment = new SubscribeToRSSFragment();
-                changeFragment(fragment);
+                FragmentUtility.changeToListFragment(this, new SubscribeToRSSFragment(), feeds);
                 return true;
-
-            case R.id.action_sync:
-                startSync();
 
             case R.id.action_about:
                 return true;
-
         }
 
         return super.onOptionsItemSelected(item);
@@ -150,48 +117,4 @@ public class MainActivity extends Activity implements PostingsListFragment.OnPos
 
     }
 
-    public void addRSSToList(String source) {
-        RssFeed f = new RssFeed();
-        f.setSource(source);
-        Log.v("v", "source added:" + source);
-        feeds.add(f);
-    }
-
-    private class RssHandler extends Handler
-    {
-        @Override
-        public void handleMessage(Message message)
-        {
-            super.handleMessage(message);
-            if (ServiceProcessorMessageUtil.isFromProcessor(message, RssProcessor.ID))
-            {
-                if (ServiceProcessorMessageUtil.isSuccessful(message))
-                {
-                    LOGGER.trace("feed fetched.");
-                    int insertIndex = -1;
-                    RssFeed feed = (RssFeed)message.obj;
-                    for (int i=0; i<feeds.size(); i++)
-                    {
-                        if (feeds.get(i).getSource() == feed.getSource())
-                        {
-                            insertIndex = i;
-                            feeds.remove(i);
-                            break;
-                        }
-                    }
-
-                    if (insertIndex >= 0)
-                        feeds.add(insertIndex, feed);
-                    else
-                        feeds.add(feed);
-                }
-                else
-                {
-                    String host = ServiceProcessorMessageUtil.getWebRequest(message).getUrl().getHost();
-                    Toast.makeText(MainActivity.this, String.format("Failed to fetch feed from %s", host), Toast.LENGTH_LONG).show();
-                    LOGGER.error(String.format("android.http HTTP Request to %s failed", host));
-                }
-            }
-        }
-    }
 }

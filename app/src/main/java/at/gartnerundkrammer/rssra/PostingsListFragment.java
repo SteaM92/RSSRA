@@ -1,6 +1,8 @@
 package at.gartnerundkrammer.rssra;
 
 import android.app.Activity;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.app.Fragment;
 import android.view.LayoutInflater;
@@ -25,7 +27,7 @@ import at.gartnerundkrammer.rssra.dummy.DummyContent;
  * <p />
  * interface.
  */
-public class PostingsListFragment extends Fragment implements AbsListView.OnItemClickListener, ListFragementInterface {
+public class PostingsListFragment extends Fragment implements AbsListView.OnItemClickListener, ListFragmentInterface {
 
     // TODO: Rename parameter arguments, choose names that match
 
@@ -93,7 +95,14 @@ public class PostingsListFragment extends Fragment implements AbsListView.OnItem
         if (null != mListener) {
             // Notify the active callbacks interface (the activity, if the
             // fragment is attached to one) that an item has been selected.
-            mListener.onPostingsListFragmentInteraction(DummyContent.ITEMS.get(position).id);
+            //mListener.onPostingsListFragmentInteraction(list.get(position).getLink());
+        }
+
+        String link = list.get(position).getLink();
+        if (link != null) {
+            Intent intent = new Intent(Intent.ACTION_VIEW);
+            intent.setData(Uri.parse(link));
+            startActivity(intent);
         }
     }
 
