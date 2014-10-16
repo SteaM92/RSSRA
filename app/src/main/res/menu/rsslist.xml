@@ -1,8 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:id="@+id/action_addRSS"
+        android:title="@string/action_addRSS"
+        android:orderInCategory="90"
+        android:showAsAction="ifRoom"
+        android:icon="@android:drawable/ic_menu_add"/>
     <item android:id="@+id/action_sync"
         android:title="@string/action_sync"
         android:orderInCategory="90"
-        android:showAsAction="never" />
+        android:showAsAction="ifRoom"
+        android:icon="@android:drawable/ic_popup_sync" />
 </menu>

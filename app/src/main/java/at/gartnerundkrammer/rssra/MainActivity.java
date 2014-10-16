@@ -91,10 +91,6 @@ public class MainActivity extends Activity implements PostingsListFragment.OnPos
             case R.id.action_settings:
                 return true;
 
-            case R.id.action_addRSS:
-                FragmentUtility.changeToListFragment(this, new SubscribeToRSSFragment(), feeds);
-                return true;
-
             case R.id.action_about:
                 return true;
         }

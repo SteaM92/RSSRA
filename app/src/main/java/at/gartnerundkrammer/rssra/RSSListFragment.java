@@ -127,6 +127,9 @@ public class RSSListFragment extends Fragment implements AbsListView.OnItemClick
     {
         int id = item.getItemId();
         switch (id) {
+            case R.id.action_addRSS:
+                FragmentUtility.changeToListFragment(getActivity(), new SubscribeToRSSFragment(), list);
+                return true;
             case R.id.action_sync:
                 startSync();
                 return true;
