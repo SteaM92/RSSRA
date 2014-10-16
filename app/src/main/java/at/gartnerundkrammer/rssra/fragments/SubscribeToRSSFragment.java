@@ -1,10 +1,9 @@
-package at.gartnerundkrammer.rssra;
+package at.gartnerundkrammer.rssra.fragments;
 
 import android.app.Activity;
 import android.net.Uri;
 import android.os.Bundle;
 import android.app.Fragment;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,11 +16,16 @@ import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
+import at.gartnerundkrammer.rssra.FragmentUtility;
+import at.gartnerundkrammer.rssra.ListFragmentInterface;
+import at.gartnerundkrammer.rssra.R;
+import at.gartnerundkrammer.rssra.models.RssFeed;
+
 
 /**
  * SubscribeToRSSFragment shows the GUI to subscribe to a RSS Feed
  * Activities that contain this fragment must implement the
- * {@link at.gartnerundkrammer.rssra.SubscribeToRSSFragment.OnSubscribeToRSSFragmentInteractionListener} interface
+ * {@link SubscribeToRSSFragment.OnSubscribeToRSSFragmentInteractionListener} interface
  * to handle interaction events.
  * Use the {@link SubscribeToRSSFragment#newInstance} factory method to
  * create an instance of this fragment.

@@ -1,4 +1,4 @@
-package at.gartnerundkrammer.rssra;
+package at.gartnerundkrammer.rssra.models;
 
 import java.util.ArrayList;
 import java.util.Date;

@@ -1,17 +1,10 @@
 package at.gartnerundkrammer.rssra;
 
 import android.app.Activity;
-import android.app.Fragment;
-import android.app.FragmentManager;
-import android.app.FragmentTransaction;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.Toast;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,10 +13,12 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import at.diamonddogs.data.dataobjects.WebRequest;
 import at.diamonddogs.net.SSLHelper;
-import at.diamonddogs.service.net.HttpServiceAssister;
-import at.diamonddogs.service.processor.ServiceProcessorMessageUtil;
+import at.gartnerundkrammer.rssra.fragments.PostingsListFragment;
+import at.gartnerundkrammer.rssra.fragments.RSSListFragment;
+import at.gartnerundkrammer.rssra.fragments.SubscribeToRSSFragment;
+import at.gartnerundkrammer.rssra.models.RssFeed;
+import at.gartnerundkrammer.rssra.models.RssFeedItem;
 
 
 public class MainActivity extends Activity implements PostingsListFragment.OnPostingsListFragmentInteractionListener, RSSListFragment.OnRSSListFragmentInteractionListener, SubscribeToRSSFragment.OnSubscribeToRSSFragmentInteractionListener{

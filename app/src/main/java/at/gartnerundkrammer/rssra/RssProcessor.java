@@ -12,6 +12,8 @@ import java.text.SimpleDateFormat;
 import java.util.Locale;
 
 import at.diamonddogs.service.processor.XMLProcessor;
+import at.gartnerundkrammer.rssra.models.RssFeed;
+import at.gartnerundkrammer.rssra.models.RssFeedItem;
 
 /**
  * RSS processor called by android-http

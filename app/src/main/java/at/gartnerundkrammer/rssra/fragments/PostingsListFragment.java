@@ -1,4 +1,4 @@
-package at.gartnerundkrammer.rssra;
+package at.gartnerundkrammer.rssra.fragments;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -17,7 +17,9 @@ import android.widget.TextView;
 
 import java.util.List;
 
-import at.gartnerundkrammer.rssra.dummy.DummyContent;
+import at.gartnerundkrammer.rssra.ListFragmentInterface;
+import at.gartnerundkrammer.rssra.R;
+import at.gartnerundkrammer.rssra.models.RssFeedItem;
 
 /**
  * PostingsListFragment shows all postings from one RSS Feed

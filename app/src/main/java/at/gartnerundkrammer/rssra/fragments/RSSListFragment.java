@@ -1,4 +1,4 @@
-package at.gartnerundkrammer.rssra;
+package at.gartnerundkrammer.rssra.fragments;
 
 import android.app.Activity;
 import android.os.Bundle;
@@ -27,6 +27,11 @@ import java.util.List;
 import at.diamonddogs.data.dataobjects.WebRequest;
 import at.diamonddogs.service.net.HttpServiceAssister;
 import at.diamonddogs.service.processor.ServiceProcessorMessageUtil;
+import at.gartnerundkrammer.rssra.FragmentUtility;
+import at.gartnerundkrammer.rssra.ListFragmentInterface;
+import at.gartnerundkrammer.rssra.R;
+import at.gartnerundkrammer.rssra.models.RssFeed;
+import at.gartnerundkrammer.rssra.RssProcessor;
 
 /**
  * RSSListFragment shows a list of your current RSS Feeds
