@@ -44,7 +44,7 @@ public class RSSListFragment extends Fragment implements AbsListView.OnItemClick
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RSSListFragment.class.getSimpleName());
 
-    private List<RssFeed> list = null;
+    private List<greendao.RssFeed> list = null;
     private HttpServiceAssister assister;
 
     private OnRSSListFragmentInteractionListener mListener;
@@ -58,7 +58,7 @@ public class RSSListFragment extends Fragment implements AbsListView.OnItemClick
      * The Adapter which will be used to populate the ListView/GridView with
      * Views.
      */
-    private ArrayAdapter<RssFeed> mAdapter;
+    private ArrayAdapter<greendao.RssFeed> mAdapter;
 
     @Override
     public void onAttach(Activity activity) {
@@ -87,7 +87,7 @@ public class RSSListFragment extends Fragment implements AbsListView.OnItemClick
         if (list == null)
             throw new IllegalStateException("setList() was not called");
         
-        mAdapter = new ArrayAdapter<RssFeed>(getActivity(),
+        mAdapter = new ArrayAdapter<greendao.RssFeed>(getActivity(),
                 android.R.layout.simple_list_item_1, android.R.id.text1, list);
     }
 
@@ -200,7 +200,7 @@ public class RSSListFragment extends Fragment implements AbsListView.OnItemClick
 
     public void startSync()
     {
-        for(RssFeed feed : list) {
+        for(greendao.RssFeed feed : list) {
             WebRequest asyncRequest = new WebRequest();
             asyncRequest.setUrl(feed.getSource());
             asyncRequest.setProcessorId(RssProcessor.ID);
@@ -220,7 +220,7 @@ public class RSSListFragment extends Fragment implements AbsListView.OnItemClick
                 {
                     LOGGER.trace("feed fetched.");
                     int insertIndex = -1;
-                    RssFeed feed = (RssFeed)message.obj;
+                    greendao.RssFeed feed = (greendao.RssFeed)message.obj;
                     feed.setSource(ServiceProcessorMessageUtil.getWebRequest(message).getUrl().toString());
                     for (int i=0; i<list.size(); i++)
                     {

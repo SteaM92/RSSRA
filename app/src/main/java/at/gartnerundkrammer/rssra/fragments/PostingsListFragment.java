@@ -33,7 +33,7 @@ public class PostingsListFragment extends Fragment implements AbsListView.OnItem
 
     // TODO: Rename parameter arguments, choose names that match
 
-    private List<RssFeedItem> list = null;
+    private List<greendao.RssFeedItem> list = null;
 
     private OnPostingsListFragmentInteractionListener mListener;
 
@@ -72,7 +72,7 @@ public class PostingsListFragment extends Fragment implements AbsListView.OnItem
         if (list == null)
             throw new IllegalStateException("setList() was not called");
 
-        mAdapter = new ArrayAdapter<RssFeedItem>(getActivity(),
+        mAdapter = new ArrayAdapter<greendao.RssFeedItem>(getActivity(),
                 android.R.layout.simple_list_item_1, android.R.id.text1, list);
 
     }

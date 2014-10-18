@@ -1,6 +1,7 @@
 package at.gartnerundkrammer.rssra;
 
 import android.app.Activity;
+import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.Menu;
@@ -17,28 +18,50 @@ import at.diamonddogs.net.SSLHelper;
 import at.gartnerundkrammer.rssra.fragments.PostingsListFragment;
 import at.gartnerundkrammer.rssra.fragments.RSSListFragment;
 import at.gartnerundkrammer.rssra.fragments.SubscribeToRSSFragment;
+
 import at.gartnerundkrammer.rssra.models.RssFeed;
 import at.gartnerundkrammer.rssra.models.RssFeedItem;
+
+import greendao.DaoMaster;
+import greendao.DaoSession;
+import greendao.RssFeedDao;
 
 
 public class MainActivity extends Activity implements PostingsListFragment.OnPostingsListFragmentInteractionListener, RSSListFragment.OnRSSListFragmentInteractionListener, SubscribeToRSSFragment.OnSubscribeToRSSFragmentInteractionListener{
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RssProcessor.class.getSimpleName());
 
-    private List<RssFeed> feeds;
+    private List<greendao.RssFeed> feeds;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        feeds = new ArrayList<RssFeed>();
+        feeds = new ArrayList<greendao.RssFeed>();
 
         SSLHelper.getInstance().initSSLFactoryJava(null, -1, null);
 
-        initTestFeed();
+        //initTestFeed();
+
+        loadListFromDB();
 
         FragmentUtility.changeToListFragment(this, new RSSListFragment(), feeds);
+    }
+
+    private void loadListFromDB() {
+        // As we are in development we will use the DevOpenHelper which drops the database on a schema update
+        DaoMaster.DevOpenHelper helper = new DaoMaster.DevOpenHelper(this, "rssra", null);
+        // Access the database using the helper
+        SQLiteDatabase db = helper.getWritableDatabase();
+        // Construct the DaoMaster which brokers DAOs for the Domain Objects
+        DaoMaster daoMaster = new DaoMaster(db);
+        // Create the session which is a container for the DAO layer and has a cache which will return handles to the same object across multiple queries
+        DaoSession daoSession = daoMaster.newSession();
+        // Access the Notes DAO
+        RssFeedDao rssFeedDao = daoSession.getRssFeedDao();
+
+        feeds = rssFeedDao.loadAll();
     }
 
     private void initTestFeed() {
@@ -52,7 +75,7 @@ public class MainActivity extends Activity implements PostingsListFragment.OnPos
         list.add(item);
         list.add(item2);
         testfeed.setItems(list);
-        feeds.add(testfeed);
+        //feeds.add(testfeed);
     }
 
     @Override

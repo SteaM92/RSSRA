@@ -1,6 +1,7 @@
 package at.gartnerundkrammer.rssra.fragments;
 
 import android.app.Activity;
+import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.os.Bundle;
 import android.app.Fragment;
@@ -16,10 +17,14 @@ import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
+import at.gartnerundkrammer.rssra.DaoExampleApplication;
 import at.gartnerundkrammer.rssra.FragmentUtility;
 import at.gartnerundkrammer.rssra.ListFragmentInterface;
 import at.gartnerundkrammer.rssra.R;
 import at.gartnerundkrammer.rssra.models.RssFeed;
+import greendao.DaoMaster;
+import greendao.DaoSession;
+import greendao.RssFeedDao;
 
 
 /**
@@ -41,7 +46,7 @@ public class SubscribeToRSSFragment extends Fragment implements View.OnClickList
 
     private OnSubscribeToRSSFragmentInteractionListener mListener;
 
-    private List<RssFeed> list = null;
+    private List<greendao.RssFeed> list = null;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -127,10 +132,21 @@ public class SubscribeToRSSFragment extends Fragment implements View.OnClickList
     }
 
     public void addRSSToList(String source) {
-        RssFeed f = new RssFeed();
-        f.setSource(source);
-        LOGGER.trace("v", "added:" + source);
-        list.add(f);
+        // As we are in development we will use the DevOpenHelper which drops the database on a schema update
+        DaoMaster.DevOpenHelper helper = new DaoMaster.DevOpenHelper(getActivity(), "rssra", null);
+        // Access the database using the helper
+        SQLiteDatabase db = helper.getWritableDatabase();
+        // Construct the DaoMaster which brokers DAOs for the Domain Objects
+        DaoMaster daoMaster = new DaoMaster(db);
+        // Create the session which is a container for the DAO layer and has a cache which will return handles to the same object across multiple queries
+        DaoSession daoSession = daoMaster.newSession();
+
+        RssFeedDao rssFeedDao = daoSession.getRssFeedDao();
+
+        greendao.RssFeed rssFeed = new greendao.RssFeed();
+        rssFeed.setSource(source);
+        rssFeedDao.insert(rssFeed);
+        list.add(rssFeed);
     }
 
     /**
