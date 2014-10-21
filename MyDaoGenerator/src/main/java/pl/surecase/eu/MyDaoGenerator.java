@@ -8,11 +8,12 @@ import de.greenrobot.daogenerator.Entity;
 import de.greenrobot.daogenerator.Property;
 import de.greenrobot.daogenerator.Schema;
 import de.greenrobot.daogenerator.ToMany;
+import de.greenrobot.daogenerator.ToOne;
 
 public class MyDaoGenerator {
 
     public static void main(String args[]) throws Exception {
-        Schema schema = new Schema(3, "greendao"); //use version 3
+        Schema schema = new Schema(4, "greendao"); //use version 4
 
         Entity rssFeed = schema.addEntity("RssFeed");
         rssFeed.addIdProperty();
@@ -26,15 +27,19 @@ public class MyDaoGenerator {
 
         Entity rssFeedItem = schema.addEntity("RssFeedItem");
         Property rssFeedItemID = rssFeedItem.addIdProperty().getProperty();
+        Property rssFeedID = rssFeedItem.addLongProperty("feedId").getProperty();
         rssFeedItem.addStringProperty("title");
         rssFeedItem.addStringProperty("description");
         rssFeedItem.addStringProperty("link");
         rssFeedItem.addStringProperty("author");
         rssFeedItem.addDateProperty("pubDate");
 
-        ToMany items = rssFeed.addToMany(rssFeedItem, rssFeedItemID);
+        ToMany items = rssFeed.addToMany(rssFeedItem, rssFeedID);
         items.setName("items"); // Optional
         //items.orderAsc(orderDate); // Optional
+
+        ToOne feed = rssFeedItem.addToOne(rssFeed, rssFeedID);
+        feed.setName("feed");
 
         new DaoGenerator().generateAll(schema, args[0]);
     }

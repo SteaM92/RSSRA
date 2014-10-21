@@ -32,6 +32,7 @@ import at.gartnerundkrammer.rssra.ListFragmentInterface;
 import at.gartnerundkrammer.rssra.R;
 import at.gartnerundkrammer.rssra.models.RssFeed;
 import at.gartnerundkrammer.rssra.RssProcessor;
+import greendao.RssFeedItem;
 
 /**
  * RSSListFragment shows a list of your current RSS Feeds
@@ -204,7 +205,7 @@ public class RSSListFragment extends Fragment implements AbsListView.OnItemClick
             WebRequest asyncRequest = new WebRequest();
             asyncRequest.setUrl(feed.getSource());
             asyncRequest.setProcessorId(RssProcessor.ID);
-            assister.runWebRequest(new RssHandler(), asyncRequest, new RssProcessor());
+            assister.runWebRequest(new RssHandler(), asyncRequest, new RssProcessor(getActivity()));
         }
     }
 
@@ -222,12 +223,18 @@ public class RSSListFragment extends Fragment implements AbsListView.OnItemClick
                     int insertIndex = -1;
                     greendao.RssFeed feed = (greendao.RssFeed)message.obj;
                     feed.setSource(ServiceProcessorMessageUtil.getWebRequest(message).getUrl().toString());
+                    feed.update();
+                    feed.resetItems();
                     for (int i=0; i<list.size(); i++)
                     {
                         if (list.get(i).getSource().equals(feed.getSource()))
                         {
                             insertIndex = i;
+                            greendao.RssFeed f = list.get(i);
                             list.remove(i);
+                            for (RssFeedItem item : f.getItems())
+                                item.delete();
+                            f.delete();
                             break;
                         }
                     }
@@ -238,6 +245,10 @@ public class RSSListFragment extends Fragment implements AbsListView.OnItemClick
                         list.add(feed);
 
                     mAdapter.notifyDataSetChanged();
+
+                    String host = ServiceProcessorMessageUtil.getWebRequest(message).getUrl().getHost();
+                    Toast.makeText(getActivity(), String.format("Feed %s updated", host), Toast.LENGTH_LONG).show();
+                    LOGGER.info(String.format("Feed %s updated", host));
                 }
                 else
                 {

@@ -4,4 +4,4 @@
 /.idea/libraries
 /.idea/dictionaries
 .DS_Store
-/build
+build/
