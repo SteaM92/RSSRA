@@ -1,6 +1,7 @@
 package at.gartnerundkrammer.rssra;
 
 import android.app.Activity;
+import android.content.ContentValues;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.os.Bundle;
@@ -27,6 +28,7 @@ import greendao.DaoSession;
 import greendao.RssFeedContentProvider;
 import greendao.RssFeedDao;
 import greendao.RssFeedItemContentProvider;
+import greendao.RssFeedItemDao;
 
 
 public class MainActivity extends Activity implements PostingsListFragment.OnPostingsListFragmentInteractionListener, RSSListFragment.OnRSSListFragmentInteractionListener, SubscribeToRSSFragment.OnSubscribeToRSSFragmentInteractionListener{
@@ -131,7 +133,60 @@ public class MainActivity extends Activity implements PostingsListFragment.OnPos
     }
 
     @Override
+    public void onFeedReaded(ArrayList<Long> ids, Long feedId) {
+        for(Long id : ids) {
+            ContentValues valuesFeedItem = new ContentValues();
+            valuesFeedItem.put(RssFeedItemDao.Properties.State.columnName, "readed");
+
+            getApplicationContext().getContentResolver().update(RssFeedItemContentProvider.CONTENT_URI,valuesFeedItem, RssFeedItemDao.Properties.Id.columnName + "=?",new String[]{Long.toString(id)});
+        }
+
+        FragmentUtility.changeFragment(this, new PostingsListFragment());
+
+    }
+
+
+    @Override
+    public void onFeedUnreaded(ArrayList<Long> ids, Long feedId) {
+        for(Long id : ids) {
+            ContentValues valuesFeedItem = new ContentValues();
+            valuesFeedItem.put(RssFeedItemDao.Properties.State.columnName, "unread");
+
+            getApplicationContext().getContentResolver().update(RssFeedItemContentProvider.CONTENT_URI,valuesFeedItem, RssFeedItemDao.Properties.Id.columnName + "=?",new String[]{Long.toString(id)});
+        }
+
+        FragmentUtility.changeFragment(this, new PostingsListFragment());
+
+    }
+
+
+    @Override
+    public void onFeedStarred(ArrayList<Long> ids, Long feedId) {
+        for(Long id : ids) {
+            ContentValues valuesFeedItem = new ContentValues();
+            valuesFeedItem.put(RssFeedItemDao.Properties.State.columnName, "starred");
+
+            getApplicationContext().getContentResolver().update(RssFeedItemContentProvider.CONTENT_URI,valuesFeedItem, RssFeedItemDao.Properties.Id.columnName + "=?",new String[]{Long.toString(id)});
+        }
+
+        FragmentUtility.changeFragment(this, new PostingsListFragment());
+
+    }
+
+
+    @Override
     public void onRSSListFragmentInteraction(String id) {
+
+    }
+
+    @Override
+    public void onFeedsDeleted(ArrayList<Long> feedsToDelete) {
+        for(Long id : feedsToDelete) {
+            getApplicationContext().getContentResolver().delete(RssFeedItemContentProvider.CONTENT_URI, RssFeedItemDao.Properties.FeedId.columnName + "=?",new String[]{Long.toString(id)});
+            getApplicationContext().getContentResolver().delete(RssFeedContentProvider.CONTENT_URI, RssFeedDao.Properties.Id.columnName + "=?",new String[]{Long.toString(id)});
+        }
+
+        FragmentUtility.changeFragment(this, new RSSListFragment());
 
     }
 

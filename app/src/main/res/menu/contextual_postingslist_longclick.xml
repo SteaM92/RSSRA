@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<menu xmlns:android="http://schemas.android.com/apk/res/android" >
+    <item
+        android:id="@+id/menu_star"
+        android:showAsAction="ifRoom|withText"
+        android:title="@string/posting_starred" />
+    <item
+        android:id="@+id/menu_read"
+        android:showAsAction="ifRoom|withText"
+        android:title="@string/posting_read" />
+    <item
+        android:id="@+id/menu_unread"
+        android:showAsAction="ifRoom|withText"
+        android:title="@string/posting_unread" />
+
+</menu>

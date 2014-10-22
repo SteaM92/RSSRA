@@ -7,6 +7,8 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.util.SparseBooleanArray;
+import android.view.ActionMode;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -17,12 +19,15 @@ import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.CursorAdapter;
 import android.widget.ListAdapter;
+import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.ArrayList;
 
 import at.diamonddogs.data.dataobjects.WebRequest;
 import at.diamonddogs.service.net.HttpServiceAssister;
@@ -31,6 +36,7 @@ import at.gartnerundkrammer.rssra.FragmentUtility;
 import at.gartnerundkrammer.rssra.R;
 import at.gartnerundkrammer.rssra.RssProcessor;
 import greendao.RssFeedContentProvider;
+import greendao.RssFeedDao;
 
 /**
  * RSSListFragment shows a list of your current RSS Feeds
@@ -39,7 +45,7 @@ import greendao.RssFeedContentProvider;
  * with a GridView.
  * <p />
  */
-public class RSSListFragment extends Fragment implements AbsListView.OnItemClickListener {
+public class RSSListFragment extends Fragment implements AbsListView.OnItemClickListener, AbsListView.MultiChoiceModeListener {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RSSListFragment.class.getSimpleName());
 
@@ -116,6 +122,9 @@ public class RSSListFragment extends Fragment implements AbsListView.OnItemClick
 
         // Set OnItemClickListener so we can be notified on item clicks
         mListView.setOnItemClickListener(this);
+
+        mListView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE_MODAL);
+        mListView.setMultiChoiceModeListener(this);
         return view;
     }
 
@@ -169,6 +178,50 @@ public class RSSListFragment extends Fragment implements AbsListView.OnItemClick
         }
     }
 
+    @Override
+    public void onItemCheckedStateChanged(ActionMode actionMode, int i, long l, boolean b) {
+        actionMode.setTitle(mListView.getCheckedItemCount() + " selected");
+    }
+
+    @Override
+    public boolean onCreateActionMode(ActionMode actionMode, Menu menu) {
+        MenuInflater inflater = actionMode.getMenuInflater();
+        inflater.inflate(R.menu.contextual_rsslist_longclick, menu);
+
+        return true;
+    }
+
+    @Override
+    public boolean onPrepareActionMode(ActionMode actionMode, Menu menu) {
+        return false;
+    }
+
+    @Override
+    public boolean onActionItemClicked(ActionMode actionMode, MenuItem menuItem) {
+        SparseBooleanArray checkedItems = mListView.getCheckedItemPositions();
+        ArrayList<Long> feedsToDelete = new ArrayList<Long>();
+        for (int i = 0; i < checkedItems.size(); i++) {
+            if (checkedItems.valueAt(i)) {
+                mAdapter.getCursor().moveToPosition(checkedItems.keyAt(i));
+                Long idFeed = mAdapter.getCursor().getLong(mAdapter.getCursor().getColumnIndex(RssFeedDao.Properties.Id.columnName));
+
+                feedsToDelete.add(idFeed);
+            }
+        }
+
+        Toast.makeText(getActivity(), "deleted", Toast.LENGTH_LONG).show();
+
+        //callback in activity
+        mListener.onFeedsDeleted(feedsToDelete);
+        actionMode.finish();
+        return true;
+    }
+
+    @Override
+    public void onDestroyActionMode(ActionMode actionMode) {
+
+    }
+
     /**
     * This interface must be implemented by activities that contain this
     * fragment to allow an interaction in this fragment to be communicated
@@ -182,6 +235,9 @@ public class RSSListFragment extends Fragment implements AbsListView.OnItemClick
     public interface OnRSSListFragmentInteractionListener {
         // TODO: Update argument type and name
         public void onRSSListFragmentInteraction(String id);
+
+        void onFeedsDeleted(ArrayList<Long> feedsToDelete);
+
     }
 
     private void bindData()

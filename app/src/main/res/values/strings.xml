@@ -14,4 +14,7 @@
     <string name="title_activity_my">MyActivity</string>
     <string name="action_sync">Synchronize</string>
     <string name="emptyFeed">This feed is empty. Try synchronizing.</string>
+    <string name="posting_starred">stare</string>
+    <string name="posting_read">read</string>
+    <string name="posting_unread">unread</string>
 </resources>

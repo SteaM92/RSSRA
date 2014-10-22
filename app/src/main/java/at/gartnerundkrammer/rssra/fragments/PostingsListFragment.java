@@ -6,18 +6,30 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
+import android.util.SparseBooleanArray;
+import android.view.ActionMode;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
+import android.widget.CursorAdapter;
 import android.widget.ListAdapter;
+import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
+import android.widget.Toast;
+
+import java.util.ArrayList;
 
 import at.gartnerundkrammer.rssra.R;
 import greendao.RssFeed;
+import greendao.RssFeedDao;
 import greendao.RssFeedItemContentProvider;
+import greendao.RssFeedItemDao;
 
 /**
  * PostingsListFragment shows all postings from one RSS Feed
@@ -27,7 +39,7 @@ import greendao.RssFeedItemContentProvider;
  * <p />
  * interface.
  */
-public class PostingsListFragment extends Fragment implements AbsListView.OnItemClickListener {
+public class PostingsListFragment extends Fragment implements AbsListView.OnItemClickListener, AbsListView.MultiChoiceModeListener {
 
     // TODO: Rename parameter arguments, choose names that match
 
@@ -44,7 +56,7 @@ public class PostingsListFragment extends Fragment implements AbsListView.OnItem
      * The Adapter which will be used to populate the ListView/GridView with
      * Views.
      */
-    private ListAdapter mAdapter;
+    private CursorAdapter mAdapter;
 
     @Override
     public void onAttach(Activity activity) {
@@ -84,6 +96,9 @@ public class PostingsListFragment extends Fragment implements AbsListView.OnItem
 
         // Set OnItemClickListener so we can be notified on item clicks
         mListView.setOnItemClickListener(this);
+
+        mListView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE_MODAL);
+        mListView.setMultiChoiceModeListener(this);
 
         mListView.setAdapter(mAdapter);
 
@@ -126,6 +141,108 @@ public class PostingsListFragment extends Fragment implements AbsListView.OnItem
         this.feedId = feedId;
     }
 
+    @Override
+    public void onItemCheckedStateChanged(ActionMode actionMode, int i, long l, boolean b) {
+        actionMode.setTitle(mListView.getCheckedItemCount() + " selected");
+    }
+
+    @Override
+    public boolean onCreateActionMode(ActionMode actionMode, Menu menu) {
+        MenuInflater inflater = actionMode.getMenuInflater();
+        inflater.inflate(R.menu.contextual_postingslist_longclick, menu);
+
+        return true;
+    }
+
+    @Override
+    public boolean onPrepareActionMode(ActionMode actionMode, Menu menu) {
+        return false;
+    }
+
+    @Override
+    public boolean onActionItemClicked(ActionMode actionMode, MenuItem menuItem) {
+        Long feedId = null;
+
+        switch (menuItem.getItemId()) {
+            case R.id.menu_read:
+
+                ArrayList<Long> feedsToRead = new ArrayList<Long>();
+                SparseBooleanArray checkedItems = mListView.getCheckedItemPositions();
+
+                for (int i = 0; i < checkedItems.size(); i++) {
+                    if (checkedItems.valueAt(i)) {
+                        mAdapter.getCursor().moveToPosition(checkedItems.keyAt(i));
+                        Long feedID = mAdapter.getCursor().getLong(mAdapter.getCursor().getColumnIndex(RssFeedItemDao.Properties.Id.columnName));
+
+                        if(feedId == null)
+                            feedId = mAdapter.getCursor().getLong(mAdapter.getCursor().getColumnIndex(RssFeedItemDao.Properties.FeedId.columnName));
+
+                        feedsToRead.add(feedID);
+                    }
+                }
+                mListener.onFeedReaded(feedsToRead, feedId);
+
+                Toast.makeText(getActivity(), "Read", Toast.LENGTH_SHORT).show();
+
+                actionMode.finish();
+                break;
+            case R.id.menu_unread:
+
+
+                SparseBooleanArray checkedItemsUnRead = mListView.getCheckedItemPositions();
+                ArrayList<Long> feedsToUnReaded = new ArrayList<Long>();
+                for (int i = 0; i < checkedItemsUnRead.size(); i++) {
+                    if (checkedItemsUnRead.valueAt(i)) {
+                        mAdapter.getCursor().moveToPosition(checkedItemsUnRead.keyAt(i));
+                        Long idFeed = mAdapter.getCursor().getLong(mAdapter.getCursor().getColumnIndex(RssFeedItemDao.Properties.Id.columnName));
+
+                        if(feedId == null)
+                            feedId = mAdapter.getCursor().getLong(mAdapter.getCursor().getColumnIndex(RssFeedItemDao.Properties.FeedId.columnName));
+
+
+                        feedsToUnReaded.add(idFeed);
+                    }
+                }
+                //callback in activity
+                mListener.onFeedUnreaded(feedsToUnReaded,feedId);
+
+                Toast.makeText(getActivity(), "Unread", Toast.LENGTH_SHORT).show();
+
+                actionMode.finish();
+                break;
+            case R.id.menu_star:
+                Toast.makeText(getActivity(), "Starred", Toast.LENGTH_SHORT).show();
+
+                SparseBooleanArray checkedItemsStarred = mListView.getCheckedItemPositions();
+                ArrayList<Long> feedsToStarr = new ArrayList<Long>();
+                for (int i = 0; i < checkedItemsStarred.size(); i++) {
+                    if (checkedItemsStarred.valueAt(i)) {
+                        mAdapter.getCursor().moveToPosition(checkedItemsStarred.keyAt(i));
+                        Long idFeed = mAdapter.getCursor().getLong(mAdapter.getCursor().getColumnIndex(RssFeedItemDao.Properties.Id.columnName));
+
+                        if(feedId == null)
+                            feedId = mAdapter.getCursor().getLong(mAdapter.getCursor().getColumnIndex(RssFeedItemDao.Properties.FeedId.columnName));
+
+
+                        feedsToStarr.add(idFeed);
+                    }
+                }
+                //callback in activity
+                mListener.onFeedStarred(feedsToStarr,feedId);
+
+                actionMode.finish();
+                break;
+
+        }
+        return true;
+
+    }
+
+    @Override
+    public void onDestroyActionMode(ActionMode actionMode) {
+
+    }
+
     /**
     * This interface must be implemented by activities that contain this
     * fragment to allow an interaction in this fragment to be communicated
@@ -139,6 +256,12 @@ public class PostingsListFragment extends Fragment implements AbsListView.OnItem
     public interface OnPostingsListFragmentInteractionListener {
         // TODO: Update argument type and name
         public void onPostingsListFragmentInteraction(String id);
+
+        void onFeedReaded(ArrayList<Long> feedsToRead, Long feedId);
+
+        void onFeedUnreaded(ArrayList<Long> feedsToUnReaded, Long feedId);
+
+        void onFeedStarred(ArrayList<Long> feedsToStarr, Long feedId);
     }
 
 }
