@@ -123,7 +123,7 @@ public class RssFeed {
         else
             return String.format("%s (%s)", title, source);
     }
-
+    
     /** To-many relationship, resolved on first access (and after reset). Changes to to-many relations are not persisted, make changes to the target entity. */
     public List<RssFeedItem> getItems() {
         if (items == null) {

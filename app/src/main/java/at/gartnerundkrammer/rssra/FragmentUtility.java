@@ -18,11 +18,6 @@ public class FragmentUtility {
         transaction.commit();
     }
 
-    public static void changeToListFragment(Activity activity, ListFragmentInterface fr, List list) {
-        fr.setListData(list);
-        changeFragment(activity, fr.getFragment());
-    }
-
     public static void changeToLastFragment(Activity activity) {
         activity.getFragmentManager().popBackStack();
     }

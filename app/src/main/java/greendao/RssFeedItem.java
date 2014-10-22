@@ -106,6 +106,12 @@ public class RssFeedItem {
         this.pubDate = pubDate;
     }
 
+    @Override
+    public String toString()
+    {
+        return String.format("%s", title);
+    }
+
     /** To-one relationship, resolved on first access. */
     public RssFeed getFeed() {
         Long __key = this.feedId;
@@ -129,12 +135,6 @@ public class RssFeedItem {
             feedId = feed == null ? null : feed.getId();
             feed__resolvedKey = feedId;
         }
-    }
-
-    @Override
-    public String toString()
-    {
-        return String.format("%s", title);
     }
 
     /** Convenient call for {@link AbstractDao#delete(Object)}. Entity must attached to an entity context. */

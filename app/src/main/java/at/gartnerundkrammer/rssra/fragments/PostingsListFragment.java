@@ -1,25 +1,23 @@
 package at.gartnerundkrammer.rssra.fragments;
 
 import android.app.Activity;
+import android.app.Fragment;
 import android.content.Intent;
+import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
-import android.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.ListAdapter;
+import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
 
-
-import java.util.List;
-
-import at.gartnerundkrammer.rssra.ListFragmentInterface;
 import at.gartnerundkrammer.rssra.R;
-import at.gartnerundkrammer.rssra.models.RssFeedItem;
+import greendao.RssFeed;
+import greendao.RssFeedContentProvider;
 
 /**
  * PostingsListFragment shows all postings from one RSS Feed
@@ -29,11 +27,11 @@ import at.gartnerundkrammer.rssra.models.RssFeedItem;
  * <p />
  * interface.
  */
-public class PostingsListFragment extends Fragment implements AbsListView.OnItemClickListener, ListFragmentInterface {
+public class PostingsListFragment extends Fragment implements AbsListView.OnItemClickListener {
 
     // TODO: Rename parameter arguments, choose names that match
 
-    private List<greendao.RssFeedItem> list = null;
+    private RssFeed feed;
 
     private OnPostingsListFragmentInteractionListener mListener;
 
@@ -69,12 +67,10 @@ public class PostingsListFragment extends Fragment implements AbsListView.OnItem
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        if (list == null)
-            throw new IllegalStateException("setList() was not called");
-
-        mAdapter = new ArrayAdapter<greendao.RssFeedItem>(getActivity(),
-                android.R.layout.simple_list_item_1, android.R.id.text1, list);
-
+        Cursor c = getActivity().getContentResolver().query(RssFeedContentProvider.CONTENT_URI,
+                new String[]{"title"}, "feed_id", new String[]{feed.getId().toString()}, null);
+        mAdapter = new SimpleCursorAdapter(getActivity(),  android.R.layout.simple_list_item_1,
+                c, new String[]{"title"}, new int[]{android.R.id.text1}, SimpleCursorAdapter.FLAG_REGISTER_CONTENT_OBSERVER);
     }
 
     @Override
@@ -89,6 +85,7 @@ public class PostingsListFragment extends Fragment implements AbsListView.OnItem
         // Set OnItemClickListener so we can be notified on item clicks
         mListView.setOnItemClickListener(this);
 
+        mListView.setAdapter(mAdapter);
         return view;
     }
 
@@ -100,7 +97,7 @@ public class PostingsListFragment extends Fragment implements AbsListView.OnItem
             //mListener.onPostingsListFragmentInteraction(list.get(position).getLink());
         }
 
-        String link = list.get(position).getLink();
+        String link = ((RssFeed)mAdapter.getItem(position)).getLink();
         if (link != null) {
             Intent intent = new Intent(Intent.ACTION_VIEW);
             intent.setData(Uri.parse(link));
@@ -121,17 +118,9 @@ public class PostingsListFragment extends Fragment implements AbsListView.OnItem
         }
     }
 
-    @Override
-    public void setListData(List list) {
-        if (list == null)
-            throw new IllegalArgumentException("list must not be null");
-
-        this.list = list;
-    }
-
-    @Override
-    public Fragment getFragment() {
-        return this;
+    public void setFeed(RssFeed feed)
+    {
+        this.feed = feed;
     }
 
     /**

@@ -1,7 +1,4 @@
-package pl.surecase.eu;
-
-import java.util.Date;
-import java.util.List;
+package at.gartnerundkrammer.rssra.daogenerator;
 
 import de.greenrobot.daogenerator.DaoGenerator;
 import de.greenrobot.daogenerator.Entity;
@@ -13,17 +10,21 @@ import de.greenrobot.daogenerator.ToOne;
 public class MyDaoGenerator {
 
     public static void main(String args[]) throws Exception {
+
         Schema schema = new Schema(4, "greendao"); //use version 4
 
         Entity rssFeed = schema.addEntity("RssFeed");
         rssFeed.addIdProperty();
-        rssFeed.addStringProperty("source");
+        rssFeed.addStringProperty("source")
+            ;
         rssFeed.addStringProperty("title");
         rssFeed.addStringProperty("description");
         rssFeed.addStringProperty("link");
         rssFeed.addStringProperty("language");
         rssFeed.addStringProperty("copyright");
         rssFeed.addDateProperty("pubDate");
+        rssFeed.addContentProvider();
+
 
         Entity rssFeedItem = schema.addEntity("RssFeedItem");
         Property rssFeedItemID = rssFeedItem.addIdProperty().getProperty();

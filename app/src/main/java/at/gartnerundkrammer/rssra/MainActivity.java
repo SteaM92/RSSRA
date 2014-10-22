@@ -46,7 +46,7 @@ public class MainActivity extends Activity implements PostingsListFragment.OnPos
 
         loadListFromDB();
 
-        FragmentUtility.changeToListFragment(this, new RSSListFragment(), feeds);
+        FragmentUtility.changeFragment(this, new RSSListFragment());
     }
 
     private void loadListFromDB() {
