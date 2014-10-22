@@ -17,7 +17,7 @@ import android.widget.TextView;
 
 import at.gartnerundkrammer.rssra.R;
 import greendao.RssFeed;
-import greendao.RssFeedContentProvider;
+import greendao.RssFeedItemContentProvider;
 
 /**
  * PostingsListFragment shows all postings from one RSS Feed
@@ -31,7 +31,7 @@ public class PostingsListFragment extends Fragment implements AbsListView.OnItem
 
     // TODO: Rename parameter arguments, choose names that match
 
-    private RssFeed feed;
+    private long feedId;
 
     private OnPostingsListFragmentInteractionListener mListener;
 
@@ -67,10 +67,10 @@ public class PostingsListFragment extends Fragment implements AbsListView.OnItem
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        Cursor c = getActivity().getContentResolver().query(RssFeedContentProvider.CONTENT_URI,
-                new String[]{"title"}, "feed_id", new String[]{feed.getId().toString()}, null);
+        Cursor c = getActivity().getContentResolver().query(RssFeedItemContentProvider.CONTENT_URI,
+                new String[]{"_id", "title"}, "feed_id = ?", new String[]{Long.toString(feedId)}, null);
         mAdapter = new SimpleCursorAdapter(getActivity(),  android.R.layout.simple_list_item_1,
-                c, new String[]{"title"}, new int[]{android.R.id.text1}, SimpleCursorAdapter.FLAG_REGISTER_CONTENT_OBSERVER);
+                c, new String[]{"TITLE"}, new int[]{android.R.id.text1}, SimpleCursorAdapter.FLAG_REGISTER_CONTENT_OBSERVER);
     }
 
     @Override
@@ -86,6 +86,9 @@ public class PostingsListFragment extends Fragment implements AbsListView.OnItem
         mListView.setOnItemClickListener(this);
 
         mListView.setAdapter(mAdapter);
+
+        setEmptyText(getString(R.string.emptyFeed));
+
         return view;
     }
 
@@ -118,9 +121,9 @@ public class PostingsListFragment extends Fragment implements AbsListView.OnItem
         }
     }
 
-    public void setFeed(RssFeed feed)
+    public void setFeed(long feedId)
     {
-        this.feed = feed;
+        this.feedId = feedId;
     }
 
     /**

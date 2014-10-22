@@ -24,7 +24,9 @@ import at.gartnerundkrammer.rssra.models.RssFeedItem;
 
 import greendao.DaoMaster;
 import greendao.DaoSession;
+import greendao.RssFeedContentProvider;
 import greendao.RssFeedDao;
+import greendao.RssFeedItemContentProvider;
 
 
 public class MainActivity extends Activity implements PostingsListFragment.OnPostingsListFragmentInteractionListener, RSSListFragment.OnRSSListFragmentInteractionListener, SubscribeToRSSFragment.OnSubscribeToRSSFragmentInteractionListener{
@@ -47,6 +49,13 @@ public class MainActivity extends Activity implements PostingsListFragment.OnPos
         loadListFromDB();
 
         FragmentUtility.changeFragment(this, new RSSListFragment());
+
+        DaoMaster.DevOpenHelper helper = new DaoMaster.DevOpenHelper(this, "rssra", null);
+        SQLiteDatabase db = helper.getWritableDatabase();
+        DaoMaster daoMaster = new DaoMaster(db);
+        DaoSession daoSession = daoMaster.newSession();
+        RssFeedContentProvider.setDaoSession(daoSession);
+        RssFeedItemContentProvider.setDaoSession(daoSession);
     }
 
     private void loadListFromDB() {

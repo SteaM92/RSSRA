@@ -13,7 +13,7 @@ import android.text.TextUtils;
 import de.greenrobot.dao.DaoLog;
 
 import greendao.DaoSession;
-import greendao.RssFeedDao;
+import greendao.RssFeedItemDao;
 
 /* Copy this code snippet into your AndroidManifest.xml inside the
 <application> element:
@@ -23,29 +23,29 @@ import greendao.RssFeedDao;
             android:authorities="greendao.provider"/>
     */
 
-    public class RssFeedContentProvider extends ContentProvider {
+    public class RssFeedItemContentProvider extends ContentProvider {
 
-    public static final String AUTHORITY = "at.gartnerundkrammer.greendao.feedprovider";
-    public static final String BASE_PATH = "rssfeed";
+    public static final String AUTHORITY = "at.gartnerundkrammer.greendao.itemprovider";
+    public static final String BASE_PATH = "rssfeeditem";
     public static final Uri CONTENT_URI = Uri.parse("content://" + AUTHORITY + "/" + BASE_PATH);
     public static final String CONTENT_TYPE = ContentResolver.CURSOR_DIR_BASE_TYPE
     + "/" + BASE_PATH;
     public static final String CONTENT_ITEM_TYPE = ContentResolver.CURSOR_ITEM_BASE_TYPE
     + "/" + BASE_PATH;
 
-    private static final String TABLENAME = RssFeedDao.TABLENAME;
-    private static final String PK = RssFeedDao.Properties.Id
+    private static final String TABLENAME = RssFeedItemDao.TABLENAME;
+    private static final String PK = RssFeedItemDao.Properties.Id
     .columnName;
 
-    private static final int RSSFEED_DIR = 0;
-    private static final int RSSFEED_ID = 1;
+    private static final int RSSFEEDITEM_DIR = 0;
+    private static final int RSSFEEDITEM_ID = 1;
 
     private static final UriMatcher sURIMatcher;
 
     static {
     sURIMatcher = new UriMatcher(UriMatcher.NO_MATCH);
-    sURIMatcher.addURI(AUTHORITY, BASE_PATH, RSSFEED_DIR);
-    sURIMatcher.addURI(AUTHORITY, BASE_PATH + "/#", RSSFEED_ID);
+    sURIMatcher.addURI(AUTHORITY, BASE_PATH, RSSFEEDITEM_DIR);
+    sURIMatcher.addURI(AUTHORITY, BASE_PATH + "/#", RSSFEEDITEM_ID);
     }
 
     /**
@@ -80,7 +80,7 @@ import greendao.RssFeedDao;
     long id = 0;
     String path = "";
     switch (uriType) {
-    case RSSFEED_DIR:
+    case RSSFEEDITEM_DIR:
     id = getDatabase().insert(TABLENAME, null, values);
     path = BASE_PATH + "/" + id;
     break;
@@ -98,10 +98,10 @@ import greendao.RssFeedDao;
     int rowsDeleted = 0;
     String id;
     switch (uriType) {
-    case RSSFEED_DIR:
+    case RSSFEEDITEM_DIR:
     rowsDeleted = db.delete(TABLENAME, selection, selectionArgs);
     break;
-    case RSSFEED_ID:
+    case RSSFEEDITEM_ID:
     id = uri.getLastPathSegment();
     if (TextUtils.isEmpty(selection)) {
     rowsDeleted = db.delete(TABLENAME, PK + "=" + id, null);
@@ -125,10 +125,10 @@ import greendao.RssFeedDao;
     int rowsUpdated = 0;
     String id;
     switch (uriType) {
-    case RSSFEED_DIR:
+    case RSSFEEDITEM_DIR:
     rowsUpdated = db.update(TABLENAME, values, selection, selectionArgs);
     break;
-    case RSSFEED_ID:
+    case RSSFEEDITEM_ID:
     id = uri.getLastPathSegment();
     if (TextUtils.isEmpty(selection)) {
     rowsUpdated = db.update(TABLENAME, values, PK + "=" + id, null);
@@ -150,10 +150,10 @@ import greendao.RssFeedDao;
     SQLiteQueryBuilder queryBuilder = new SQLiteQueryBuilder();
     int uriType = sURIMatcher.match(uri);
     switch (uriType) {
-    case RSSFEED_DIR:
+    case RSSFEEDITEM_DIR:
     queryBuilder.setTables(TABLENAME);
     break;
-    case RSSFEED_ID:
+    case RSSFEEDITEM_ID:
     queryBuilder.setTables(TABLENAME);
     queryBuilder.appendWhere(PK + "="
     + uri.getLastPathSegment());
@@ -173,9 +173,9 @@ import greendao.RssFeedDao;
     @Override
     public final String getType(Uri uri) {
     switch (sURIMatcher.match(uri)) {
-    case RSSFEED_DIR:
+    case RSSFEEDITEM_DIR:
     return CONTENT_TYPE;
-    case RSSFEED_ID:
+    case RSSFEEDITEM_ID:
     return CONTENT_ITEM_TYPE;
     default :
     throw new IllegalArgumentException("Unsupported URI: " + uri);

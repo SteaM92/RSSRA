@@ -25,6 +25,15 @@
 
         <service android:name="at.diamonddogs.service.net.HttpService" >
         </service>
+
+        <provider
+            android:authorities="at.gartnerundkrammer.greendao.feedprovider"
+            android:name="greendao.RssFeedContentProvider">
+        </provider>
+        <provider
+            android:authorities="at.gartnerundkrammer.greendao.itemprovider"
+            android:name="greendao.RssFeedItemContentProvider">
+        </provider>
     </application>
 
 </manifest>

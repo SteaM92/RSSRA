@@ -34,6 +34,7 @@ public class MyDaoGenerator {
         rssFeedItem.addStringProperty("link");
         rssFeedItem.addStringProperty("author");
         rssFeedItem.addDateProperty("pubDate");
+        rssFeedItem.addContentProvider();
 
         ToMany items = rssFeed.addToMany(rssFeedItem, rssFeedID);
         items.setName("items"); // Optional

@@ -3,6 +3,7 @@ package at.gartnerundkrammer.rssra.fragments;
 import android.app.Activity;
 import android.app.Fragment;
 import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -14,6 +15,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
+import android.widget.CursorAdapter;
 import android.widget.ListAdapter;
 import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
@@ -43,6 +45,8 @@ public class RSSListFragment extends Fragment implements AbsListView.OnItemClick
 
     private HttpServiceAssister assister;
 
+    private Cursor cursor;
+
     private OnRSSListFragmentInteractionListener mListener;
 
     /**
@@ -54,7 +58,7 @@ public class RSSListFragment extends Fragment implements AbsListView.OnItemClick
      * The Adapter which will be used to populate the ListView/GridView with
      * Views.
      */
-    private ListAdapter mAdapter;
+    private CursorAdapter mAdapter;
 
     @Override
     public void onAttach(Activity activity) {
@@ -79,23 +83,24 @@ public class RSSListFragment extends Fragment implements AbsListView.OnItemClick
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
-
-        Cursor c = getActivity().getContentResolver().query(RssFeedContentProvider.CONTENT_URI,
-                new String[]{"title"}, null, null, null);
-        mAdapter = new SimpleCursorAdapter(getActivity(), android.R.layout.simple_list_item_1,
-                c, new String[]{"title"}, new int[]{android.R.id.text1}, SimpleCursorAdapter.FLAG_REGISTER_CONTENT_OBSERVER);
     }
 
     @Override
     public void onResume()
     {
         assister.bindService();
+
+        bindData();
+
         super.onResume();
     }
 
     @Override
     public void onPause()
     {
+        if (cursor != null)
+            cursor.close();
+
         assister.unbindService();
         super.onPause();
     }
@@ -111,8 +116,6 @@ public class RSSListFragment extends Fragment implements AbsListView.OnItemClick
 
         // Set OnItemClickListener so we can be notified on item clicks
         mListView.setOnItemClickListener(this);
-
-        mListView.setAdapter(mAdapter);
         return view;
     }
 
@@ -148,7 +151,8 @@ public class RSSListFragment extends Fragment implements AbsListView.OnItemClick
 
         //Log.v("ja", "pos:"+position+", id"+id);
         PostingsListFragment fragment = new PostingsListFragment();
-        fragment.setFeed((greendao.RssFeed)mAdapter.getItem(position));
+        long feedId = ((Cursor)mAdapter.getItem(position)).getLong(0);
+        fragment.setFeed(feedId);
         FragmentUtility.changeFragment(getActivity(), fragment);
     }
 
@@ -180,14 +184,34 @@ public class RSSListFragment extends Fragment implements AbsListView.OnItemClick
         public void onRSSListFragmentInteraction(String id);
     }
 
+    private void bindData()
+    {
+        Uri uri = RssFeedContentProvider.CONTENT_URI;
+        cursor = getActivity().getContentResolver().query(uri,
+                new String[]{"_id", "title"}, null, null, null);
+        if (mAdapter == null) {
+            mAdapter = new SimpleCursorAdapter(getActivity(), android.R.layout.simple_list_item_1,
+                    cursor, new String[]{"TITLE"}, new int[]{android.R.id.text1}, SimpleCursorAdapter.FLAG_REGISTER_CONTENT_OBSERVER);
+            mListView.setAdapter(mAdapter);
+        }
+        else {
+            mAdapter.changeCursor(cursor);
+        }
+    }
 
     public void startSync()
     {
         //for(greendao.RssFeed feed : list) {
         for (int i=0; i<mAdapter.getCount(); i++) {
-            greendao.RssFeed feed = (greendao.RssFeed)mAdapter.getItem(i);
+            long id = ((Cursor)mAdapter.getItem(i)).getLong(0);
+            Cursor c = getActivity().getContentResolver().query(RssFeedContentProvider.CONTENT_URI,
+                    new String[]{"source"}, "_id = ?", new String[]{Long.toString(id)}, null);
+            c.moveToFirst();
+            String url = c.getString(0);
+            c.close();
+
             WebRequest asyncRequest = new WebRequest();
-            asyncRequest.setUrl(feed.getSource());
+            asyncRequest.setUrl(url);
             asyncRequest.setProcessorId(RssProcessor.ID);
             assister.runWebRequest(new RssHandler(), asyncRequest, new RssProcessor(getActivity()));
         }
@@ -209,7 +233,9 @@ public class RSSListFragment extends Fragment implements AbsListView.OnItemClick
                     feed.update();
                     feed.resetItems();
 
-                    getActivity().getContentResolver().delete(RssFeedContentProvider.CONTENT_URI, "source", new String[]{feed.getSource()});
+                    getActivity().getContentResolver().delete(RssFeedContentProvider.CONTENT_URI,
+                            "source = ? and _id != ?", new String[]{feed.getSource(), Long.toString(feed.getId())});
+                    bindData();
 
                     String host = ServiceProcessorMessageUtil.getWebRequest(message).getUrl().getHost();
                     Toast.makeText(getActivity(), String.format("Feed %s updated", host), Toast.LENGTH_LONG).show();
