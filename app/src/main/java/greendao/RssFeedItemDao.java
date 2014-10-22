@@ -35,6 +35,7 @@ public class RssFeedItemDao extends AbstractDao<RssFeedItem, Long> {
         public final static Property Link = new Property(4, String.class, "link", false, "LINK");
         public final static Property Author = new Property(5, String.class, "author", false, "AUTHOR");
         public final static Property PubDate = new Property(6, java.util.Date.class, "pubDate", false, "PUB_DATE");
+        public final static Property State = new Property(7, String.class, "state", false, "STATE");
     };
 
     private DaoSession daoSession;
@@ -60,7 +61,8 @@ public class RssFeedItemDao extends AbstractDao<RssFeedItem, Long> {
                 "'DESCRIPTION' TEXT," + // 3: description
                 "'LINK' TEXT," + // 4: link
                 "'AUTHOR' TEXT," + // 5: author
-                "'PUB_DATE' INTEGER);"); // 6: pubDate
+                "'PUB_DATE' INTEGER," + // 6: pubDate
+                "'STATE' TEXT);"); // 7: state
     }
 
     /** Drops the underlying database table. */
@@ -108,6 +110,11 @@ public class RssFeedItemDao extends AbstractDao<RssFeedItem, Long> {
         if (pubDate != null) {
             stmt.bindLong(7, pubDate.getTime());
         }
+ 
+        String state = entity.getState();
+        if (state != null) {
+            stmt.bindString(8, state);
+        }
     }
 
     @Override
@@ -132,7 +139,8 @@ public class RssFeedItemDao extends AbstractDao<RssFeedItem, Long> {
             cursor.isNull(offset + 3) ? null : cursor.getString(offset + 3), // description
             cursor.isNull(offset + 4) ? null : cursor.getString(offset + 4), // link
             cursor.isNull(offset + 5) ? null : cursor.getString(offset + 5), // author
-            cursor.isNull(offset + 6) ? null : new java.util.Date(cursor.getLong(offset + 6)) // pubDate
+            cursor.isNull(offset + 6) ? null : new java.util.Date(cursor.getLong(offset + 6)), // pubDate
+            cursor.isNull(offset + 7) ? null : cursor.getString(offset + 7) // state
         );
         return entity;
     }
@@ -147,6 +155,7 @@ public class RssFeedItemDao extends AbstractDao<RssFeedItem, Long> {
         entity.setLink(cursor.isNull(offset + 4) ? null : cursor.getString(offset + 4));
         entity.setAuthor(cursor.isNull(offset + 5) ? null : cursor.getString(offset + 5));
         entity.setPubDate(cursor.isNull(offset + 6) ? null : new java.util.Date(cursor.getLong(offset + 6)));
+        entity.setState(cursor.isNull(offset + 7) ? null : cursor.getString(offset + 7));
      }
     
     /** @inheritdoc */

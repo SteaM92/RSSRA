@@ -16,6 +16,7 @@ public class RssFeedItem {
     private String link;
     private String author;
     private java.util.Date pubDate;
+    private String state;
 
     /** Used to resolve relations */
     private transient DaoSession daoSession;
@@ -34,7 +35,7 @@ public class RssFeedItem {
         this.id = id;
     }
 
-    public RssFeedItem(Long id, Long feedId, String title, String description, String link, String author, java.util.Date pubDate) {
+    public RssFeedItem(Long id, Long feedId, String title, String description, String link, String author, java.util.Date pubDate, String state) {
         this.id = id;
         this.feedId = feedId;
         this.title = title;
@@ -42,6 +43,7 @@ public class RssFeedItem {
         this.link = link;
         this.author = author;
         this.pubDate = pubDate;
+        this.state = state;
     }
 
     /** called by internal mechanisms, do not call yourself. */
@@ -104,6 +106,14 @@ public class RssFeedItem {
 
     public void setPubDate(java.util.Date pubDate) {
         this.pubDate = pubDate;
+    }
+
+    public String getState() {
+        return state;
+    }
+
+    public void setState(String state) {
+        this.state = state;
     }
 
     @Override
