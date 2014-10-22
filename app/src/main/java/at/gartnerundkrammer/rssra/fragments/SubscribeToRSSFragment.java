@@ -98,7 +98,7 @@ public class SubscribeToRSSFragment extends Fragment implements View.OnClickList
             case R.id.SubscribeToRSS_addButton:
                 if (addRSSEditText.getText().length()>0) {
                     ContentValues values = new ContentValues();
-                    values.put("source", addRSSEditText.getText().toString());
+                    values.put(RssFeedDao.Properties.Source.columnName, addRSSEditText.getText().toString());
                     getActivity().getContentResolver().insert(RssFeedContentProvider.CONTENT_URI, values);
                     Toast.makeText(getActivity(), "RSS added", Toast.LENGTH_SHORT).show();
                     addRSSEditText.setText("");

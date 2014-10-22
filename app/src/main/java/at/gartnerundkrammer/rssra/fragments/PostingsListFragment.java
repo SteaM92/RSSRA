@@ -25,8 +25,10 @@ import android.widget.Toast;
 
 import java.util.ArrayList;
 
+import at.gartnerundkrammer.rssra.FragmentUtility;
 import at.gartnerundkrammer.rssra.R;
 import greendao.RssFeed;
+import greendao.RssFeedContentProvider;
 import greendao.RssFeedDao;
 import greendao.RssFeedItemContentProvider;
 import greendao.RssFeedItemDao;
@@ -44,6 +46,7 @@ public class PostingsListFragment extends Fragment implements AbsListView.OnItem
     // TODO: Rename parameter arguments, choose names that match
 
     private long feedId;
+    private Cursor cursor;
 
     private OnPostingsListFragmentInteractionListener mListener;
 
@@ -78,11 +81,20 @@ public class PostingsListFragment extends Fragment implements AbsListView.OnItem
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+    }
 
-        Cursor c = getActivity().getContentResolver().query(RssFeedItemContentProvider.CONTENT_URI,
-                new String[]{"_id", "title"}, "feed_id = ?", new String[]{Long.toString(feedId)}, null);
-        mAdapter = new SimpleCursorAdapter(getActivity(),  android.R.layout.simple_list_item_1,
-                c, new String[]{"TITLE"}, new int[]{android.R.id.text1}, SimpleCursorAdapter.FLAG_REGISTER_CONTENT_OBSERVER);
+    @Override
+    public void onResume()
+    {
+        super.onResume();
+        bindData();
+    }
+
+    @Override
+    public void onPause()
+    {
+        cursor.close();
+        super.onPause();
     }
 
     @Override
@@ -100,8 +112,6 @@ public class PostingsListFragment extends Fragment implements AbsListView.OnItem
         mListView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE_MODAL);
         mListView.setMultiChoiceModeListener(this);
 
-        mListView.setAdapter(mAdapter);
-
         setEmptyText(getString(R.string.emptyFeed));
 
         return view;
@@ -115,11 +125,35 @@ public class PostingsListFragment extends Fragment implements AbsListView.OnItem
             //mListener.onPostingsListFragmentInteraction(list.get(position).getLink());
         }
 
-        String link = ((RssFeed)mAdapter.getItem(position)).getLink();
+        String link = ((Cursor)mAdapter.getItem(position)).getString(
+                mAdapter.getCursor().getColumnIndex(RssFeedItemDao.Properties.Link.columnName));
+
         if (link != null) {
             Intent intent = new Intent(Intent.ACTION_VIEW);
             intent.setData(Uri.parse(link));
             startActivity(intent);
+        }
+    }
+
+    private void bindData()
+    {
+        cursor = getActivity().getContentResolver().query(RssFeedItemContentProvider.CONTENT_URI,
+            new String[]{RssFeedItemDao.Properties.Id.columnName, RssFeedItemDao.Properties.Title.columnName,
+                    RssFeedItemDao.Properties.FeedId.columnName, RssFeedItemDao.Properties.State.columnName,
+                    RssFeedItemDao.Properties.Link.columnName},
+            RssFeedItemDao.Properties.FeedId.columnName + "=?", new String[]{Long.toString(feedId)}, null);
+
+
+
+        if (mAdapter == null) {
+            mAdapter = new SimpleCursorAdapter(getActivity(), R.layout.postinglist_item_row, cursor,
+                    new String[]{RssFeedItemDao.Properties.Title.columnName, RssFeedItemDao.Properties.State.columnName},
+                    new int[]{R.id.feeditem_title, R.id.feeditem_state},
+                    SimpleCursorAdapter.FLAG_REGISTER_CONTENT_OBSERVER);
+            mListView.setAdapter(mAdapter);
+        }
+        else {
+            mAdapter.changeCursor(cursor);
         }
     }
 
@@ -142,7 +176,7 @@ public class PostingsListFragment extends Fragment implements AbsListView.OnItem
     }
 
     @Override
-    public void onItemCheckedStateChanged(ActionMode actionMode, int i, long l, boolean b) {
+    public void onItemCheckedStateChanged(ActionMode actionMode, int position, long id, boolean checked) {
         actionMode.setTitle(mListView.getCheckedItemCount() + " selected");
     }
 
@@ -234,6 +268,7 @@ public class PostingsListFragment extends Fragment implements AbsListView.OnItem
                 break;
 
         }
+        FragmentUtility.changeToLastFragment(getActivity());
         return true;
 
     }

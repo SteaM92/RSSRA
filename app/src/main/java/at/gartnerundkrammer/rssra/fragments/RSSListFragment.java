@@ -35,6 +35,7 @@ import at.diamonddogs.service.processor.ServiceProcessorMessageUtil;
 import at.gartnerundkrammer.rssra.FragmentUtility;
 import at.gartnerundkrammer.rssra.R;
 import at.gartnerundkrammer.rssra.RssProcessor;
+import at.gartnerundkrammer.rssra.models.RssFeed;
 import greendao.RssFeedContentProvider;
 import greendao.RssFeedDao;
 
@@ -244,10 +245,12 @@ public class RSSListFragment extends Fragment implements AbsListView.OnItemClick
     {
         Uri uri = RssFeedContentProvider.CONTENT_URI;
         cursor = getActivity().getContentResolver().query(uri,
-                new String[]{"_id", "title"}, null, null, null);
+                new String[]{RssFeedDao.Properties.Id.columnName, RssFeedDao.Properties.Title.columnName}, null, null, null);
+
         if (mAdapter == null) {
             mAdapter = new SimpleCursorAdapter(getActivity(), android.R.layout.simple_list_item_1,
-                    cursor, new String[]{"TITLE"}, new int[]{android.R.id.text1}, SimpleCursorAdapter.FLAG_REGISTER_CONTENT_OBSERVER);
+                    cursor, new String[]{RssFeedDao.Properties.Title.columnName},
+                    new int[]{android.R.id.text1}, SimpleCursorAdapter.FLAG_REGISTER_CONTENT_OBSERVER);
             mListView.setAdapter(mAdapter);
         }
         else {
@@ -261,7 +264,9 @@ public class RSSListFragment extends Fragment implements AbsListView.OnItemClick
         for (int i=0; i<mAdapter.getCount(); i++) {
             long id = ((Cursor)mAdapter.getItem(i)).getLong(0);
             Cursor c = getActivity().getContentResolver().query(RssFeedContentProvider.CONTENT_URI,
-                    new String[]{"source"}, "_id = ?", new String[]{Long.toString(id)}, null);
+                    new String[]{RssFeedDao.Properties.Source.columnName}, RssFeedDao.Properties.Id.columnName + "=?",
+                    new String[]{Long.toString(id)}, null);
+
             c.moveToFirst();
             String url = c.getString(0);
             c.close();
@@ -290,7 +295,10 @@ public class RSSListFragment extends Fragment implements AbsListView.OnItemClick
                     feed.resetItems();
 
                     getActivity().getContentResolver().delete(RssFeedContentProvider.CONTENT_URI,
-                            "source = ? and _id != ?", new String[]{feed.getSource(), Long.toString(feed.getId())});
+                            RssFeedDao.Properties.Source.columnName + " =? and " + RssFeedDao.Properties.Id.columnName + "!=?",
+                            new String[]{feed.getSource(), Long.toString(feed.getId())});
+
+                    // refresh list
                     bindData();
 
                     String host = ServiceProcessorMessageUtil.getWebRequest(message).getUrl().getHost();

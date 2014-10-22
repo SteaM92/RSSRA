@@ -35,20 +35,12 @@ public class MainActivity extends Activity implements PostingsListFragment.OnPos
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RssProcessor.class.getSimpleName());
 
-    private List<greendao.RssFeed> feeds;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        feeds = new ArrayList<greendao.RssFeed>();
-
         SSLHelper.getInstance().initSSLFactoryJava(null, -1, null);
-
-        //initTestFeed();
-
-        loadListFromDB();
 
         FragmentUtility.changeFragment(this, new RSSListFragment());
 
@@ -58,35 +50,6 @@ public class MainActivity extends Activity implements PostingsListFragment.OnPos
         DaoSession daoSession = daoMaster.newSession();
         RssFeedContentProvider.setDaoSession(daoSession);
         RssFeedItemContentProvider.setDaoSession(daoSession);
-    }
-
-    private void loadListFromDB() {
-        // As we are in development we will use the DevOpenHelper which drops the database on a schema update
-        DaoMaster.DevOpenHelper helper = new DaoMaster.DevOpenHelper(this, "rssra", null);
-        // Access the database using the helper
-        SQLiteDatabase db = helper.getWritableDatabase();
-        // Construct the DaoMaster which brokers DAOs for the Domain Objects
-        DaoMaster daoMaster = new DaoMaster(db);
-        // Create the session which is a container for the DAO layer and has a cache which will return handles to the same object across multiple queries
-        DaoSession daoSession = daoMaster.newSession();
-        // Access the Notes DAO
-        RssFeedDao rssFeedDao = daoSession.getRssFeedDao();
-
-        feeds = rssFeedDao.loadAll();
-    }
-
-    private void initTestFeed() {
-        RssFeed testfeed = new RssFeed();
-        testfeed.setSource("http://heise.de.feedsportal.com/c/35207/f/653902/index.rss");
-        testfeed.setTitle("Heise");
-
-        RssFeedItem item = new RssFeedItem("title", "des", "asd", "title", new Date(), "asd");
-        RssFeedItem item2 = new RssFeedItem("title2", "des2", "asd2", "title2", new Date(), "asd2");
-        List<RssFeedItem> list = new ArrayList<>();
-        list.add(item);
-        list.add(item2);
-        testfeed.setItems(list);
-        //feeds.add(testfeed);
     }
 
     @Override
@@ -136,7 +99,7 @@ public class MainActivity extends Activity implements PostingsListFragment.OnPos
     public void onFeedReaded(ArrayList<Long> ids, Long feedId) {
         for(Long id : ids) {
             ContentValues valuesFeedItem = new ContentValues();
-            valuesFeedItem.put(RssFeedItemDao.Properties.State.columnName, "readed");
+            valuesFeedItem.put(RssFeedItemDao.Properties.State.columnName, "read");
 
             getApplicationContext().getContentResolver().update(RssFeedItemContentProvider.CONTENT_URI,valuesFeedItem, RssFeedItemDao.Properties.Id.columnName + "=?",new String[]{Long.toString(id)});
         }
