@@ -80,6 +80,9 @@ public class MainActivity extends Activity implements PostingsListFragment.OnPos
 
         //noinspection SimplifiableIfStatement
         switch (id){
+            case android.R.id.home:
+                FragmentUtility.changeToLastFragment(this);
+                return true;
             case R.id.action_settings:
                 return true;
 

@@ -88,11 +88,14 @@ public class PostingsListFragment extends Fragment implements AbsListView.OnItem
     {
         super.onResume();
         bindData();
+        getActivity().getActionBar().setDisplayHomeAsUpEnabled(true);
     }
 
     @Override
     public void onPause()
     {
+        getActivity().getActionBar().setDisplayHomeAsUpEnabled(false);
+        getActivity().getActionBar().setHomeButtonEnabled(false);
         cursor.close();
         super.onPause();
     }

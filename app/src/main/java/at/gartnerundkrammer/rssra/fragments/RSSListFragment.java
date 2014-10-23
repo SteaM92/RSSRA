@@ -78,6 +78,8 @@ public class RSSListFragment extends Fragment implements AbsListView.OnItemClick
             throw new ClassCastException(activity.toString()
                     + " must implement OnRSSListFragmentInteractionListener");
         }
+
+        getActivity().getActionBar().setHomeButtonEnabled(false);
     }
 
     @Override
