@@ -223,21 +223,20 @@ public class PostingsListFragment extends Fragment implements AbsListView.OnItem
 
                 actionMode.finish();
                 break;
+
             case R.id.menu_unread:
-
-
                 SparseBooleanArray checkedItemsUnRead = mListView.getCheckedItemPositions();
                 ArrayList<Long> feedsToUnReaded = new ArrayList<Long>();
                 for (int i = 0; i < checkedItemsUnRead.size(); i++) {
                     if (checkedItemsUnRead.valueAt(i)) {
                         mAdapter.getCursor().moveToPosition(checkedItemsUnRead.keyAt(i));
-                        Long idFeed = mAdapter.getCursor().getLong(mAdapter.getCursor().getColumnIndex(RssFeedItemDao.Properties.Id.columnName));
+                        Long postID = mAdapter.getCursor().getLong(mAdapter.getCursor().getColumnIndex(RssFeedItemDao.Properties.Id.columnName));
 
                         if(feedId == null)
                             feedId = mAdapter.getCursor().getLong(mAdapter.getCursor().getColumnIndex(RssFeedItemDao.Properties.FeedId.columnName));
 
 
-                        feedsToUnReaded.add(idFeed);
+                        feedsToUnReaded.add(postID);
                     }
                 }
                 //callback in activity
