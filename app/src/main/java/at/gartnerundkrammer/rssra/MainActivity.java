@@ -1,6 +1,8 @@
 package at.gartnerundkrammer.rssra;
 
 import android.app.Activity;
+import android.app.FragmentManager;
+import android.app.FragmentTransaction;
 import android.content.ContentValues;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
@@ -42,7 +44,11 @@ public class MainActivity extends Activity implements PostingsListFragment.OnPos
 
         SSLHelper.getInstance().initSSLFactoryJava(null, -1, null);
 
-        FragmentUtility.changeFragment(this, new RSSListFragment());
+        //show Fragment
+        FragmentManager fm = this.getFragmentManager();
+        FragmentTransaction transaction = fm.beginTransaction();
+        transaction.replace(R.id.fragment_place, new RSSListFragment());
+        transaction.commit();
 
         DaoMaster.DevOpenHelper helper = new DaoMaster.DevOpenHelper(this, "rssra", null);
         SQLiteDatabase db = helper.getWritableDatabase();
